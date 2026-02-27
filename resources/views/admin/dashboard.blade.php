@@ -197,7 +197,7 @@
                 </div>
             </a>
 
-            <a href="{{ route('admin.beasiswa.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+            <a href="{{ route('admin.beasiswa.data.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
                         <i class="fas fa-graduation-cap text-white text-2xl"></i>

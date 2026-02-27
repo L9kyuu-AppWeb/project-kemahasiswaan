@@ -47,7 +47,7 @@
                     <p class="text-indigo-100 text-sm">Master data jenis beasiswa</p>
                 </div>
                 <div class="flex gap-3">
-                    <a href="{{ route('admin.beasiswa.index') }}"
+                    <a href="{{ route('admin.beasiswa.data.index') }}"
                        class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition duration-200 font-semibold flex items-center gap-2">
                         <i class="fas fa-users"></i>
                         Data Penerima

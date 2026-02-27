@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.beasiswa.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
+                    <a href="{{ route('admin.beasiswa.data.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
                         <i class="fas fa-arrow-left"></i>
                         <span class="font-semibold">Kembali</span>
                     </a>
@@ -64,7 +64,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.beasiswa.update', $mahasiswaBeasiswa->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.beasiswa.data.update', $data->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -79,7 +79,7 @@
                                 required>
                             <option value="">-- Pilih Mahasiswa --</option>
                             @foreach($mahasiswaList as $mhs)
-                                <option value="{{ $mhs->id }}" {{ old('mahasiswa_id', $mahasiswaBeasiswa->mahasiswa_id) == $mhs->id ? 'selected' : '' }}>
+                                <option value="{{ $mhs->id }}" {{ old('mahasiswa_id', $data->mahasiswa_id) == $mhs->id ? 'selected' : '' }}>
                                     {{ $mhs->name }} ({{ $mhs->nim }})
                                 </option>
                             @endforeach
@@ -99,7 +99,7 @@
                                 required>
                             <option value="">-- Pilih Jenis Beasiswa --</option>
                             @foreach($beasiswaTipeList as $tipe)
-                                <option value="{{ $tipe->id }}" {{ old('beasiswa_tipe_id', $mahasiswaBeasiswa->beasiswa_tipe_id) == $tipe->id ? 'selected' : '' }}>
+                                <option value="{{ $tipe->id }}" {{ old('beasiswa_tipe_id', $data->beasiswa_tipe_id) == $tipe->id ? 'selected' : '' }}>
                                     {{ $tipe->nama }}
                                 </option>
                             @endforeach
@@ -115,7 +115,7 @@
                         <i class="fas fa-file-alt mr-2 text-teal-600"></i>
                         Nomor SK
                     </label>
-                    <input type="text" name="nomor_sk" id="nomor_sk" value="{{ old('nomor_sk', $mahasiswaBeasiswa->nomor_sk) }}"
+                    <input type="text" name="nomor_sk" id="nomor_sk" value="{{ old('nomor_sk', $data->nomor_sk) }}"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('nomor_sk') border-red-500 @enderror"
                            required>
                     @error('nomor_sk')
@@ -129,7 +129,7 @@
                             <i class="fas fa-calendar-alt mr-2 text-teal-600"></i>
                             Tanggal Mulai
                         </label>
-                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai', $mahasiswaBeasiswa->tanggal_mulai->format('Y-m-d')) }}"
+                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai', $data->tanggal_mulai->format('Y-m-d')) }}"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('tanggal_mulai') border-red-500 @enderror"
                                required>
                         @error('tanggal_mulai')
@@ -142,7 +142,7 @@
                             <i class="fas fa-calendar-check mr-2 text-teal-600"></i>
                             Tanggal Berakhir <span class="text-gray-400 font-normal">(Opsional)</span>
                         </label>
-                        <input type="date" name="tanggal_berakhir" id="tanggal_berakhir" value="{{ old('tanggal_berakhir', $mahasiswaBeasiswa->tanggal_berakhir?->format('Y-m-d')) }}"
+                        <input type="date" name="tanggal_berakhir" id="tanggal_berakhir" value="{{ old('tanggal_berakhir', $data->tanggal_berakhir?->format('Y-m-d')) }}"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('tanggal_berakhir') border-red-500 @enderror">
                         <p class="text-gray-500 text-xs mt-1">Akan terisi otomatis jika status tidak aktif</p>
                         @error('tanggal_berakhir')
@@ -159,8 +159,8 @@
                     <input type="file" name="file_sk" id="file_sk" accept=".pdf,.jpg,.jpeg,.png"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('file_sk') border-red-500 @enderror">
                     <p class="text-gray-500 text-xs mt-1">Format: PDF, JPG, PNG. Max: 2MB</p>
-                    @if($mahasiswaBeasiswa->file_sk)
-                        <p class="text-blue-600 text-xs mt-1"><i class="fas fa-file mr-1"></i>File saat ini: {{ basename($mahasiswaBeasiswa->file_sk) }}</p>
+                    @if($data->file_sk)
+                        <p class="text-blue-600 text-xs mt-1"><i class="fas fa-file mr-1"></i>File saat ini: {{ basename($data->file_sk) }}</p>
                     @endif
                     @error('file_sk')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -175,22 +175,22 @@
                     <select name="status" id="status"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('status') border-red-500 @enderror"
                             required onchange="toggleAlasan()">
-                        <option value="aktif" {{ old('status', $mahasiswaBeasiswa->status) === 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="tidak_aktif" {{ old('status', $mahasiswaBeasiswa->status) === 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                        <option value="aktif" {{ old('status', $data->status) === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="tidak_aktif" {{ old('status', $data->status) === 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                     </select>
                     @error('status')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div class="mt-4 {{ old('status', $mahasiswaBeasiswa->status) === 'tidak_aktif' ? '' : 'hidden' }}" id="alasanContainer">
+                <div class="mt-4 {{ old('status', $data->status) === 'tidak_aktif' ? '' : 'hidden' }}" id="alasanContainer">
                     <label for="alasan_tidak_aktif" class="block text-gray-700 font-semibold mb-2">
                         <i class="fas fa-comment-alt mr-2 text-teal-600"></i>
                         Alasan Tidak Aktif
                     </label>
                     <textarea name="alasan_tidak_aktif" id="alasan_tidak_aktif" rows="3"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent @error('alasan_tidak_aktif') border-red-500 @enderror"
-                              placeholder="Jelaskan alasan tidak aktif...">{{ old('alasan_tidak_aktif', $mahasiswaBeasiswa->alasan_tidak_aktif) }}</textarea>
+                              placeholder="Jelaskan alasan tidak aktif...">{{ old('alasan_tidak_aktif', $data->alasan_tidak_aktif) }}</textarea>
                     @error('alasan_tidak_aktif')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -201,7 +201,7 @@
                         <i class="fas fa-save mr-2"></i>
                         Update Data Beasiswa
                     </button>
-                    <a href="{{ route('admin.beasiswa.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
+                    <a href="{{ route('admin.beasiswa.data.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
                         <i class="fas fa-times mr-2"></i>
                         Batal
                     </a>

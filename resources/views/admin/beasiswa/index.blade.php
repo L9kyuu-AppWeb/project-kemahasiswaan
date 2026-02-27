@@ -52,7 +52,7 @@
                         <i class="fas fa-graduation-cap"></i>
                         Jenis Beasiswa
                     </a>
-                    <a href="{{ route('admin.beasiswa.create') }}"
+                    <a href="{{ route('admin.beasiswa.data.create') }}"
                        class="bg-white text-teal-600 hover:bg-teal-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
                         <i class="fas fa-plus-circle"></i>
                         Tambah Penerima
@@ -70,7 +70,7 @@
 
         <!-- Filter Section -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <form method="GET" action="{{ route('admin.beasiswa.index') }}">
+            <form method="GET" action="{{ route('admin.beasiswa.data.index') }}">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label for="beasiswa_tipe_id" class="block text-gray-700 font-medium mb-2 text-sm">Jenis Beasiswa</label>
@@ -107,7 +107,7 @@
                             Filter
                         </button>
                         @if(request('beasiswa_tipe_id') || request('status') || request('search'))
-                            <a href="{{ route('admin.beasiswa.index') }}"
+                            <a href="{{ route('admin.beasiswa.data.index') }}"
                                class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition duration-200 font-medium">
                                 <i class="fas fa-times"></i>
                             </a>
@@ -169,12 +169,12 @@
                                 </td>
                                 <td class="py-4 px-6">
                                     <div class="flex gap-2">
-                                        <a href="{{ route('admin.beasiswa.edit', $mb->id) }}"
+                                        <a href="{{ route('admin.beasiswa.data.edit', $mb->id) }}"
                                            class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-3 py-1.5 rounded-lg transition duration-200 text-sm font-medium flex items-center gap-1">
                                             <i class="fas fa-edit"></i>
                                             Edit
                                         </a>
-                                        <form action="{{ route('admin.beasiswa.destroy', $mb->id) }}"
+                                        <form action="{{ route('admin.beasiswa.data.destroy', $mb->id) }}"
                                               method="POST"
                                               onsubmit="return confirm('Yakin ingin menghapus data ini?');">
                                             @csrf
@@ -192,7 +192,7 @@
                                 <td colspan="7" class="py-8 px-6 text-center text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-2 text-gray-300"></i>
                                     <p>Belum ada data penerima beasiswa.</p>
-                                    <a href="{{ route('admin.beasiswa.create') }}" class="text-teal-600 hover:underline mt-2 inline-block">
+                                    <a href="{{ route('admin.beasiswa.data.create') }}" class="text-teal-600 hover:underline mt-2 inline-block">
                                         Tambah data penerima pertama
                                     </a>
                                 </td>

@@ -51,4 +51,20 @@ class Mahasiswa extends Authenticatable
     {
         return $this->belongsTo(ProgramStudi::class);
     }
+
+    /**
+     * Get active beasiswa for this mahasiswa.
+     */
+    public function beasiswas()
+    {
+        return $this->hasMany(MahasiswaBeasiswa::class)->where('status', 'aktif');
+    }
+
+    /**
+     * Get all laporan for this mahasiswa.
+     */
+    public function laporanBeasiswas()
+    {
+        return $this->hasMany(LaporanBeasiswa::class);
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BeasiswaController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MahasiswaPengumumanController;
 use App\Http\Controllers\PengumumanController;
@@ -59,8 +60,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/tipe/{beasiswaTipe}', [BeasiswaController::class, 'destroyTipe'])->name('tipe.destroy');
             
             // Mahasiswa Beasiswa (Transaction)
-            Route::get('/', [BeasiswaController::class, 'index'])->name('index');
-            Route::resource('/', BeasiswaController::class)->except(['index']);
+            Route::resource('data', BeasiswaController::class);
         });
 
         // Pengumuman Management
@@ -81,5 +81,17 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         // Pengumuman Routes for Mahasiswa
         Route::get('/pengumuman', [MahasiswaPengumumanController::class, 'index'])->name('pengumuman.index');
         Route::get('/pengumuman/{pengumuman}', [MahasiswaPengumumanController::class, 'show'])->name('pengumuman.show');
+        
+        // Laporan Beasiswa Routes for Mahasiswa
+        Route::prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('/', [LaporanController::class, 'index'])->name('index');
+            Route::get('/create', [LaporanController::class, 'create'])->name('create');
+            Route::post('/', [LaporanController::class, 'store'])->name('store');
+            Route::get('/{laporan}', [LaporanController::class, 'show'])->name('show');
+            Route::get('/{laporan}/edit', [LaporanController::class, 'edit'])->name('edit');
+            Route::put('/{laporan}', [LaporanController::class, 'update'])->name('update');
+            Route::post('/{laporan}/submit', [LaporanController::class, 'submit'])->name('submit');
+            Route::delete('/{laporan}', [LaporanController::class, 'destroy'])->name('destroy');
+        });
     });
 });

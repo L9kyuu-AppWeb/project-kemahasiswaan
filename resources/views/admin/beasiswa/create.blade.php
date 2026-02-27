@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.beasiswa.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
+                    <a href="{{ route('admin.beasiswa.data.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
                         <i class="fas fa-arrow-left"></i>
                         <span class="font-semibold">Kembali</span>
                     </a>
@@ -64,7 +64,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.beasiswa.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.beasiswa.data.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -197,7 +197,7 @@
                         <i class="fas fa-save mr-2"></i>
                         Simpan Data Beasiswa
                     </button>
-                    <a href="{{ route('admin.beasiswa.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
+                    <a href="{{ route('admin.beasiswa.data.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
                         <i class="fas fa-times mr-2"></i>
                         Batal
                     </a>

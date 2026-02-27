@@ -52,4 +52,13 @@ class MahasiswaBeasiswa extends Model
     {
         return $this->belongsTo(BeasiswaTipe::class);
     }
+
+    /**
+     * Get laporan beasiswa for this beasiswa record.
+     */
+    public function laporanBeasiswas()
+    {
+        return $this->hasMany(LaporanBeasiswa::class, 'beasiswa_tipe_id', 'beasiswa_tipe_id')
+            ->where('mahasiswa_id', $this->mahasiswa_id);
+    }
 }

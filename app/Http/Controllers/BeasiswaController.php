@@ -155,32 +155,33 @@ class BeasiswaController extends Controller
 
         MahasiswaBeasiswa::create($validated);
 
-        return redirect()->route('admin.beasiswa.index')
+        return redirect()->route('admin.beasiswa.data.index')
             ->with('success', 'Mahasiswa penerima beasiswa berhasil ditambahkan.');
     }
 
     /**
      * Display mahasiswa beasiswa detail.
      */
-    public function show(MahasiswaBeasiswa $mahasiswaBeasiswa)
+    public function show(MahasiswaBeasiswa $data)
     {
-        return view('admin.beasiswa.show', compact('mahasiswaBeasiswa'));
+        // Redirect to index since we don't have a show view
+        return redirect()->route('admin.beasiswa.data.index');
     }
 
     /**
      * Show form for editing mahasiswa beasiswa.
      */
-    public function edit(MahasiswaBeasiswa $mahasiswaBeasiswa)
+    public function edit(MahasiswaBeasiswa $data)
     {
         $mahasiswaList = Mahasiswa::with('programStudi')->orderBy('name')->get();
         $beasiswaTipeList = BeasiswaTipe::where('status', 'aktif')->orderBy('nama')->get();
-        return view('admin.beasiswa.edit', compact('mahasiswaBeasiswa', 'mahasiswaList', 'beasiswaTipeList'));
+        return view('admin.beasiswa.edit', compact('data', 'mahasiswaList', 'beasiswaTipeList'));
     }
 
     /**
      * Update mahasiswa beasiswa.
      */
-    public function update(Request $request, MahasiswaBeasiswa $mahasiswaBeasiswa)
+    public function update(Request $request, MahasiswaBeasiswa $data)
     {
         $validated = $request->validate([
             'mahasiswa_id' => 'required|exists:mahasiswas,id',
@@ -196,38 +197,38 @@ class BeasiswaController extends Controller
         // Handle file upload
         if ($request->hasFile('file_sk')) {
             // Delete old file
-            if ($mahasiswaBeasiswa->file_sk) {
-                Storage::disk('public')->delete($mahasiswaBeasiswa->file_sk);
+            if ($data->file_sk) {
+                Storage::disk('public')->delete($data->file_sk);
             }
             $validated['file_sk'] = $request->file('file_sk')->store('beasiswa/sk', 'public');
         }
 
         // Set inactive_at if status changed to tidak_aktif
-        if ($validated['status'] === 'tidak_aktif' && $mahasiswaBeasiswa->status === 'aktif') {
+        if ($validated['status'] === 'tidak_aktif' && $data->status === 'aktif') {
             $validated['inactive_at'] = now();
         } elseif ($validated['status'] === 'aktif') {
             $validated['inactive_at'] = null;
         }
 
-        $mahasiswaBeasiswa->update($validated);
+        $data->update($validated);
 
-        return redirect()->route('admin.beasiswa.index')
+        return redirect()->route('admin.beasiswa.data.index')
             ->with('success', 'Data beasiswa mahasiswa berhasil diperbarui.');
     }
 
     /**
      * Delete mahasiswa beasiswa.
      */
-    public function destroy(MahasiswaBeasiswa $mahasiswaBeasiswa)
+    public function destroy(MahasiswaBeasiswa $data)
     {
         // Delete file if exists
-        if ($mahasiswaBeasiswa->file_sk) {
-            Storage::disk('public')->delete($mahasiswaBeasiswa->file_sk);
+        if ($data->file_sk) {
+            Storage::disk('public')->delete($data->file_sk);
         }
 
-        $mahasiswaBeasiswa->delete();
+        $data->delete();
 
-        return redirect()->route('admin.beasiswa.index')
+        return redirect()->route('admin.beasiswa.data.index')
             ->with('success', 'Data beasiswa mahasiswa berhasil dihapus.');
     }
 }
