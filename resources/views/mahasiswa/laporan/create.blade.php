@@ -61,6 +61,23 @@
             </div>
         @endif
 
+        <!-- Info Alert -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+            <div class="flex items-start gap-4">
+                <div class="text-blue-600 text-2xl">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-blue-800 mb-2">Informasi Laporan</h4>
+                    <ul class="text-blue-700 text-sm space-y-1">
+                        <li>• Tahun Ajar aktif: <strong>{{ $tahunAjarAktif->nama ?? '-' }}</strong></li>
+                        <li>• Anda hanya bisa membuat <strong>1 laporan</strong> untuk tahun ajar ini.</li>
+                        <li>• Jika laporan ditolak, Anda bisa membuat laporan baru untuk tahun ajar yang sama.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <form action="{{ route('mahasiswa.laporan.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
@@ -70,22 +87,18 @@
                     <i class="fas fa-info-circle text-purple-600"></i>
                     Data Utama
                 </h3>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="tahun_ajar_id" class="block text-gray-700 font-semibold mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>
                             Tahun Ajar <span class="text-red-500">*</span>
                         </label>
-                        <select name="tahun_ajar_id" id="tahun_ajar_id" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="">-- Pilih Tahun Ajar --</option>
-                            @foreach($tahunAjarList as $ta)
-                                <option value="{{ $ta->id }}" {{ old('tahun_ajar_id') == $ta->id ? 'selected' : '' }}>
-                                    {{ $ta->nama }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="hidden" name="tahun_ajar_id" value="{{ $tahunAjarAktif->id }}">
+                        <div class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-medium">
+                            {{ $tahunAjarAktif->nama ?? '-' }}
+                            <span class="float-right text-green-600 text-xs"><i class="fas fa-check-circle"></i> Aktif</span>
+                        </div>
                     </div>
 
                     <div>

@@ -242,6 +242,18 @@
                 </div>
             </a>
 
+            <a href="{{ route('mahasiswa.laporan-magang.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                <div class="flex items-start gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200 shrink-0">
+                        <i class="fas fa-briefcase text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 group-hover:text-orange-600 transition mb-1">Laporan Magang</h3>
+                        <p class="text-sm text-gray-500">Kelola laporan magang</p>
+                    </div>
+                </div>
+            </a>
+
             <a href="#" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100 opacity-60">
                 <div class="flex items-start gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200 shrink-0">

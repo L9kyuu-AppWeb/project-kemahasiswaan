@@ -46,11 +46,31 @@
                     </h2>
                     <p class="text-purple-100 text-sm">Kelola laporan kegiatan beasiswa Anda</p>
                 </div>
-                <a href="{{ route('mahasiswa.laporan.create') }}"
-                   class="bg-white text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
-                    <i class="fas fa-plus-circle"></i>
-                    Buat Laporan Baru
-                </a>
+                @php
+                    $canCreateLaporan = true;
+                    $tahunAjarAktif = \App\Models\TahunAjar::where('is_active', true)->first();
+                    if ($tahunAjarAktif) {
+                        // Cek apakah ada laporan untuk tahun ajar aktif dengan status selain rejected
+                        $existingLaporan = $laporans->where('tahun_ajar_id', $tahunAjarAktif->id)
+                            ->where('status', '!=', 'rejected')
+                            ->first();
+                        if ($existingLaporan) {
+                            $canCreateLaporan = false;
+                        }
+                    }
+                @endphp
+                @if($canCreateLaporan)
+                    <a href="{{ route('mahasiswa.laporan.create') }}"
+                       class="bg-white text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-plus-circle"></i>
+                        Buat Laporan Baru
+                    </a>
+                @else
+                    <span class="bg-white/20 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2" title="Anda sudah memiliki laporan yang sedang diproses">
+                        <i class="fas fa-info-circle"></i>
+                        Laporan Sedang Aktif
+                    </span>
+                @endif
             </div>
         </div>
 
@@ -65,6 +85,68 @@
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
                 <i class="fas fa-exclamation-circle"></i>
                 {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- Info Alert -->
+        @php
+            $tahunAjarAktif = \App\Models\TahunAjar::where('is_active', true)->first();
+            $rejectedLaporan = null;
+            $activeLaporan = null;
+            if ($tahunAjarAktif) {
+                $rejectedLaporan = $laporans->where('tahun_ajar_id', $tahunAjarAktif->id)
+                    ->where('status', 'rejected')
+                    ->first();
+                $activeLaporan = $laporans->where('tahun_ajar_id', $tahunAjarAktif->id)
+                    ->where('status', '!=', 'rejected')
+                    ->first();
+            }
+        @endphp
+
+        @if($tahunAjarAktif)
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+                <div class="flex items-start gap-4">
+                    <div class="text-green-600 text-2xl">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-green-800 mb-2">Tahun Ajar Aktif</h4>
+                        <p class="text-green-700 text-sm">
+                            Tahun ajar aktif saat ini adalah <strong>{{ $tahunAjarAktif->nama }}</strong> ({{ ucfirst($tahunAjarAktif->semester) }}).
+                            Laporan beasiswa hanya bisa dibuat untuk tahun ajar ini.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($rejectedLaporan)
+            <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <p class="font-semibold">Laporan Ditolak</p>
+                    <p class="text-sm">Anda memiliki laporan yang ditolak untuk tahun ajar {{ $rejectedLaporan->tahunAjar->nama }}. Silakan buat laporan baru untuk memperbaiki.</p>
+                </div>
+            </div>
+        @endif
+
+        @if($activeLaporan)
+            <div class="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <p class="font-semibold">Laporan Aktif</p>
+                    <p class="text-sm">
+                        @if($activeLaporan->status === 'approved')
+                            Anda sudah memiliki laporan yang <strong>disetujui</strong> untuk tahun ajar {{ $activeLaporan->tahunAjar->nama }}. Tidak perlu membuat laporan baru.
+                        @elseif($activeLaporan->status === 'submitted')
+                            Anda sudah memiliki laporan yang <strong>sedang direview</strong> untuk tahun ajar {{ $activeLaporan->tahunAjar->nama }}. Tunggu hasil review admin.
+                        @else
+                            Anda sudah memiliki laporan dalam status <strong>draft</strong> untuk tahun ajar {{ $activeLaporan->tahunAjar->nama }}. Selesaikan atau kirim laporan tersebut.
+                        @endif
+                        <br>
+                        <strong class="text-blue-900">Anda hanya bisa membuat 1 laporan aktif per tahun ajar.</strong>
+                    </p>
+                </div>
             </div>
         @endif
 

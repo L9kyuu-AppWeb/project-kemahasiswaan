@@ -58,7 +58,7 @@ class MahasiswaBeasiswa extends Model
      */
     public function laporanBeasiswas()
     {
-        return $this->hasMany(LaporanBeasiswa::class, 'beasiswa_tipe_id', 'beasiswa_tipe_id')
-            ->where('mahasiswa_id', $this->mahasiswa_id);
+        return $this->hasMany(LaporanBeasiswa::class, 'mahasiswa_id', 'mahasiswa_id')
+            ->where('beasiswa_tipe_id', $this->beasiswa_tipe_id);
     }
 }

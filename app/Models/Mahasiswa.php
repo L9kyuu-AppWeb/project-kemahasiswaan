@@ -67,4 +67,20 @@ class Mahasiswa extends Authenticatable
     {
         return $this->hasMany(LaporanBeasiswa::class);
     }
+
+    /**
+     * Get magang records for this mahasiswa.
+     */
+    public function magangs()
+    {
+        return $this->hasMany(MahasiswaMagang::class);
+    }
+
+    /**
+     * Get active magang for this mahasiswa.
+     */
+    public function magangAktif()
+    {
+        return $this->hasOne(MahasiswaMagang::class)->where('status', 'aktif');
+    }
 }

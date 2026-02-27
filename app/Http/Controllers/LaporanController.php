@@ -10,9 +10,12 @@ use App\Models\LaporanKompetisi;
 use App\Models\LaporanPublikasi;
 use App\Models\TahunAjar;
 use App\Models\BeasiswaTipe;
+use App\Models\Mahasiswa;
+use App\Models\MahasiswaBeasiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
@@ -26,8 +29,124 @@ class LaporanController extends Controller
             ->where('mahasiswa_id', $mahasiswa->id)
             ->latest()
             ->paginate(10);
-        
+
         return view('mahasiswa.laporan.index', compact('laporans'));
+    }
+
+    /**
+     * Display list of all laporan for admin.
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = LaporanBeasiswa::with(['mahasiswa.programStudi', 'beasiswaTipe', 'tahunAjar']);
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('beasiswa_tipe_id')) {
+            $query->where('beasiswa_tipe_id', $request->beasiswa_tipe_id);
+        }
+
+        if ($request->filled('tahun_ajar_id')) {
+            $query->where('tahun_ajar_id', $request->tahun_ajar_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('mahasiswa', function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('nim', 'like', "%{$search}%");
+            });
+        }
+
+        $laporans = $query->latest()->paginate(10);
+        $beasiswaTipeList = BeasiswaTipe::where('status', 'aktif')->orderBy('nama')->get();
+        $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
+
+        return view('admin.laporan.index', compact('laporans', 'beasiswaTipeList', 'tahunAjarList'));
+    }
+
+    /**
+     * Display specified laporan for admin.
+     */
+    public function adminShow(LaporanBeasiswa $laporan)
+    {
+        $laporan->load(['laporanAkademik', 'laporanReferals', 'laporanPendanaans', 'laporanKompetisis', 'laporanPublikasis', 'tahunAjar', 'beasiswaTipe', 'mahasiswa.programStudi']);
+        return view('admin.laporan.show', compact('laporan'));
+    }
+
+    /**
+     * Download laporan as PDF.
+     */
+    public function downloadPdf(LaporanBeasiswa $laporan)
+    {
+        $laporan->load(['laporanAkademik', 'laporanReferals', 'laporanPendanaans', 'laporanKompetisis', 'laporanPublikasis', 'tahunAjar', 'beasiswaTipe', 'mahasiswa.programStudi']);
+
+        $pdf = Pdf::loadView('admin.laporan.pdf', compact('laporan'));
+        
+        $filename = 'Laporan_Beasiswa_' . $laporan->mahasiswa->nim . '_Semester_' . $laporan->semester . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Download multiple laporan as PDF.
+     */
+    public function downloadMultiplePdf(Request $request)
+    {
+        $validated = $request->validate([
+            'laporan_ids' => 'required|array',
+            'laporan_ids.*' => 'exists:laporan_beasiswas,id',
+        ]);
+
+        $laporans = LaporanBeasiswa::with(['laporanAkademik', 'laporanReferals', 'laporanPendanaans', 'laporanKompetisis', 'laporanPublikasis', 'tahunAjar', 'beasiswaTipe', 'mahasiswa.programStudi'])
+            ->whereIn('id', $validated['laporan_ids'])
+            ->get();
+
+        $pdf = Pdf::loadView('admin.laporan.pdf-multiple', compact('laporans'));
+        
+        $filename = 'Laporan_Beasiswa_' . now()->format('Y-m-d_His') . '.pdf';
+        
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Approve laporan.
+     */
+    public function adminApprove(Request $request, LaporanBeasiswa $laporan)
+    {
+        $validated = $request->validate([
+            'catatan_admin' => 'nullable|string|max:1000',
+        ]);
+
+        $laporan->update([
+            'status' => 'approved',
+            'catatan_admin' => $validated['catatan_admin'] ?? null,
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('success', 'Laporan berhasil disetujui.');
+    }
+
+    /**
+     * Reject laporan.
+     */
+    public function adminReject(Request $request, LaporanBeasiswa $laporan)
+    {
+        $validated = $request->validate([
+            'catatan_admin' => 'required|string|max:1000',
+        ]);
+
+        $laporan->update([
+            'status' => 'rejected',
+            'catatan_admin' => $validated['catatan_admin'],
+            'approved_at' => null,
+        ]);
+
+        return redirect()->route('admin.laporan.index')
+            ->with('success', 'Laporan ditolak.');
     }
 
     /**
@@ -36,16 +155,43 @@ class LaporanController extends Controller
     public function create()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
         $beasiswaTipe = $mahasiswa->beasiswas()->where('status', 'aktif')->first();
-        
+
         // Check if mahasiswa has active beasiswa
         if (!$beasiswaTipe) {
             return redirect()->route('mahasiswa.laporan.index')
                 ->with('error', 'Anda tidak memiliki beasiswa aktif.');
         }
 
-        return view('mahasiswa.laporan.create', compact('tahunAjarList', 'beasiswaTipe'));
+        // Get active tahun ajar
+        $tahunAjarAktif = TahunAjar::where('is_active', true)->first();
+
+        if (!$tahunAjarAktif) {
+            return redirect()->route('mahasiswa.laporan.index')
+                ->with('error', 'Tidak ada tahun ajar aktif. Silakan hubungi administrator.');
+        }
+
+        // Check if mahasiswa already has a laporan for active tahun ajar that is not rejected
+        // Hanya boleh 1 laporan aktif (selain rejected) per tahun ajar aktif
+        $existingLaporan = LaporanBeasiswa::where('mahasiswa_id', $mahasiswa->id)
+            ->where('tahun_ajar_id', $tahunAjarAktif->id)
+            ->whereIn('status', ['draft', 'submitted', 'approved'])
+            ->first();
+
+        if ($existingLaporan) {
+            $statusText = [
+                'draft' => 'masih dalam status draft',
+                'submitted' => 'sudah dikirim dan sedang direview',
+                'approved' => 'sudah disetujui'
+            ];
+            
+            return redirect()->route('mahasiswa.laporan.index')
+                ->with('error', 'Anda sudah memiliki laporan untuk tahun ajar ' . $tahunAjarAktif->nama . ' yang ' . $statusText[$existingLaporan->status] . '. Anda hanya bisa membuat laporan baru jika laporan sebelumnya ditolak.');
+        }
+
+        $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
+
+        return view('mahasiswa.laporan.create', compact('tahunAjarList', 'beasiswaTipe', 'tahunAjarAktif'));
     }
 
     /**

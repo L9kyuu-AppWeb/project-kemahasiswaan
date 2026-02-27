@@ -4,10 +4,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BeasiswaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LaporanMagangController;
 use App\Http\Controllers\MahasiswaController;
+use App\Http\Controllers\MahasiswaMagangController;
 use App\Http\Controllers\MahasiswaPengumumanController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\ProgramStudiController;
+use App\Http\Controllers\TahunAjarController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -67,6 +70,50 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('pengumuman', PengumumanController::class)->parameters([
             'pengumuman' => 'pengumuman'
         ]);
+
+        // Laporan Beasiswa Management (Admin)
+        Route::prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('/', [LaporanController::class, 'adminIndex'])->name('index');
+            Route::get('/{laporan}', [LaporanController::class, 'adminShow'])->name('show');
+            Route::get('/{laporan}/download-pdf', [LaporanController::class, 'downloadPdf'])->name('download-pdf');
+            Route::post('/download-multiple-pdf', [LaporanController::class, 'downloadMultiplePdf'])->name('download-multiple-pdf');
+            Route::post('/{laporan}/approve', [LaporanController::class, 'adminApprove'])->name('approve');
+            Route::post('/{laporan}/reject', [LaporanController::class, 'adminReject'])->name('reject');
+        });
+
+        // Tahun Ajar Management (Admin)
+        Route::prefix('tahun-ajar')->name('tahun-ajar.')->group(function () {
+            Route::get('/', [TahunAjarController::class, 'index'])->name('index');
+            Route::get('/create', [TahunAjarController::class, 'create'])->name('create');
+            Route::post('/', [TahunAjarController::class, 'store'])->name('store');
+            Route::get('/{tahunAjar}', [TahunAjarController::class, 'show'])->name('show');
+            Route::get('/{tahunAjar}/edit', [TahunAjarController::class, 'edit'])->name('edit');
+            Route::put('/{tahunAjar}', [TahunAjarController::class, 'update'])->name('update');
+            Route::post('/{tahunAjar}/set-active', [TahunAjarController::class, 'setActive'])->name('set-active');
+            Route::delete('/{tahunAjar}', [TahunAjarController::class, 'destroy'])->name('destroy');
+        });
+
+        // Mahasiswa Magang Management (Admin)
+        Route::prefix('magang')->name('magang.')->group(function () {
+            Route::get('/', [MahasiswaMagangController::class, 'index'])->name('index');
+            Route::get('/create', [MahasiswaMagangController::class, 'create'])->name('create');
+            Route::post('/', [MahasiswaMagangController::class, 'store'])->name('store');
+            Route::get('/{magang}', [MahasiswaMagangController::class, 'show'])->name('show');
+            Route::get('/{magang}/edit', [MahasiswaMagangController::class, 'edit'])->name('edit');
+            Route::put('/{magang}', [MahasiswaMagangController::class, 'update'])->name('update');
+            Route::delete('/{magang}', [MahasiswaMagangController::class, 'destroy'])->name('destroy');
+        });
+
+        // Laporan Magang Management (Admin)
+        Route::prefix('laporan-magang')->name('laporan-magang.')->group(function () {
+            Route::get('/', [LaporanMagangController::class, 'adminIndex'])->name('index');
+            Route::get('/mahasiswa/{mahasiswaId}', [LaporanMagangController::class, 'adminShowMahasiswa'])->name('mahasiswa');
+            Route::get('/{laporanMagang}', [LaporanMagangController::class, 'adminShow'])->name('show');
+            Route::get('/{laporanMagang}/download-pdf', [LaporanMagangController::class, 'downloadPdf'])->name('download-pdf');
+            Route::post('/download-multiple-pdf', [LaporanMagangController::class, 'downloadMultiplePdf'])->name('download-multiple-pdf');
+            Route::post('/{laporanMagang}/approve', [LaporanMagangController::class, 'adminApprove'])->name('approve');
+            Route::post('/{laporanMagang}/reject', [LaporanMagangController::class, 'adminReject'])->name('reject');
+        });
     });
 });
 
@@ -92,6 +139,18 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
             Route::put('/{laporan}', [LaporanController::class, 'update'])->name('update');
             Route::post('/{laporan}/submit', [LaporanController::class, 'submit'])->name('submit');
             Route::delete('/{laporan}', [LaporanController::class, 'destroy'])->name('destroy');
+        });
+
+        // Laporan Magang Routes for Mahasiswa
+        Route::prefix('laporan-magang')->name('laporan-magang.')->group(function () {
+            Route::get('/', [LaporanMagangController::class, 'index'])->name('index');
+            Route::get('/create', [LaporanMagangController::class, 'create'])->name('create');
+            Route::post('/', [LaporanMagangController::class, 'store'])->name('store');
+            Route::get('/{laporan}', [LaporanMagangController::class, 'show'])->name('show');
+            Route::get('/{laporan}/edit', [LaporanMagangController::class, 'edit'])->name('edit');
+            Route::put('/{laporan}', [LaporanMagangController::class, 'update'])->name('update');
+            Route::post('/{laporan}/submit', [LaporanMagangController::class, 'submit'])->name('submit');
+            Route::delete('/{laporan}', [LaporanMagangController::class, 'destroy'])->name('destroy');
         });
     });
 });
