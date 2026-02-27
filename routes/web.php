@@ -74,6 +74,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Laporan Beasiswa Management (Admin)
         Route::prefix('laporan')->name('laporan.')->group(function () {
             Route::get('/', [LaporanController::class, 'adminIndex'])->name('index');
+            Route::get('/mahasiswa/{mahasiswaId}', [LaporanController::class, 'adminShowMahasiswa'])->name('mahasiswa');
             Route::get('/{laporan}', [LaporanController::class, 'adminShow'])->name('show');
             Route::get('/{laporan}/download-pdf', [LaporanController::class, 'downloadPdf'])->name('download-pdf');
             Route::post('/download-multiple-pdf', [LaporanController::class, 'downloadMultiplePdf'])->name('download-multiple-pdf');

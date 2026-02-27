@@ -34,37 +34,72 @@ class LaporanController extends Controller
     }
 
     /**
-     * Display list of all laporan for admin.
+     * Display list of all laporan for admin (grouped by mahasiswa).
      */
     public function adminIndex(Request $request)
     {
         $query = LaporanBeasiswa::with(['mahasiswa.programStudi', 'beasiswaTipe', 'tahunAjar']);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if ($request->filled('tahun_ajar_id')) {
+            $query->where('tahun_ajar_id', $request->tahun_ajar_id);
         }
 
         if ($request->filled('beasiswa_tipe_id')) {
             $query->where('beasiswa_tipe_id', $request->beasiswa_tipe_id);
         }
 
-        if ($request->filled('tahun_ajar_id')) {
-            $query->where('tahun_ajar_id', $request->tahun_ajar_id);
-        }
+        // Group by mahasiswa and count reports
+        $laporans = $query->get();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('mahasiswa', function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nim', 'like', "%{$search}%");
-            });
-        }
+        // Group by mahasiswa_id
+        $groupedLaporans = $laporans->groupBy('mahasiswa_id');
 
-        $laporans = $query->latest()->paginate(10);
+        // Create summary for each mahasiswa
+        $mahasiswaList = $groupedLaporans->map(function($laporans, $mahasiswaId) {
+            $firstLaporan = $laporans->first();
+            return [
+                'mahasiswa_id' => $mahasiswaId,
+                'mahasiswa' => $firstLaporan->mahasiswa,
+                'program_studi' => $firstLaporan->mahasiswa->programStudi,
+                'beasiswa_tipe' => $firstLaporan->beasiswaTipe,
+                'total_laporan' => $laporans->count(),
+                'laporans' => $laporans,
+                'latest_report' => $laporans->sortByDesc('created_at')->first(),
+                'status_summary' => [
+                    'draft' => $laporans->where('status', 'draft')->count(),
+                    'submitted' => $laporans->where('status', 'submitted')->count(),
+                    'approved' => $laporans->where('status', 'approved')->count(),
+                    'rejected' => $laporans->where('status', 'rejected')->count(),
+                ]
+            ];
+        })->sortBy('mahasiswa.name');
+
         $beasiswaTipeList = BeasiswaTipe::where('status', 'aktif')->orderBy('nama')->get();
         $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
 
-        return view('admin.laporan.index', compact('laporans', 'beasiswaTipeList', 'tahunAjarList'));
+        return view('admin.laporan.index', compact('mahasiswaList', 'beasiswaTipeList', 'tahunAjarList'));
+    }
+
+    /**
+     * Display all laporan for a specific mahasiswa.
+     */
+    public function adminShowMahasiswa($mahasiswaId)
+    {
+        $mahasiswa = Mahasiswa::with('programStudi')->findOrFail($mahasiswaId);
+        $laporans = LaporanBeasiswa::with(['tahunAjar', 'beasiswaTipe'])
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->latest()
+            ->get();
+
+        $totalLaporan = $laporans->count();
+        $statusSummary = [
+            'draft' => $laporans->where('status', 'draft')->count(),
+            'submitted' => $laporans->where('status', 'submitted')->count(),
+            'approved' => $laporans->where('status', 'approved')->count(),
+            'rejected' => $laporans->where('status', 'rejected')->count(),
+        ];
+
+        return view('admin.laporan.mahasiswa-detail', compact('mahasiswa', 'laporans', 'totalLaporan', 'statusSummary'));
     }
 
     /**
