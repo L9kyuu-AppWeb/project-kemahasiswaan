@@ -57,15 +57,9 @@
                             {{ $mahasiswa->email }}
                         </span>
                         <span class="flex items-center gap-2">
-                            <i class="fas fa-graduation-cap"></i>
+                            <i class="fas fa-calendar-alt"></i>
                             Angkatan {{ $mahasiswa->tahun_masuk }}
                         </span>
-                        @if($mahasiswa->programStudi)
-                            <span class="flex items-center gap-2">
-                                <i class="fas fa-university"></i>
-                                {{ $mahasiswa->programStudi->nama }}
-                            </span>
-                        @endif
                     </div>
                 </div>
                 <a href="{{ route('mahasiswa.profile') }}" class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg transition duration-200 flex items-center gap-2 backdrop-blur-sm">
@@ -74,6 +68,51 @@
                 </a>
             </div>
         </div>
+
+        <!-- Status Beasiswa Card -->
+        @if($beasiswaAktif)
+            <div class="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl shadow-lg p-6 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                            <i class="fas fa-graduation-cap text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Status Beasiswa Aktif</h3>
+                            <p class="text-blue-100 text-lg">{{ $beasiswaAktif->beasiswaTipe->nama }}</p>
+                            <p class="text-blue-200 text-sm mt-1">
+                                <i class="fas fa-file-alt mr-1"></i> SK: {{ $beasiswaAktif->nomor_sk }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="bg-white/20 px-4 py-2 rounded-full text-sm font-semibold">
+                            <i class="fas fa-check-circle mr-1"></i> Aktif
+                        </span>
+                        <p class="text-blue-200 text-xs mt-2">
+                            <i class="fas fa-calendar mr-1"></i> Mulai: {{ $beasiswaAktif->tanggal_mulai->format('d M Y') }}
+                        </p>
+                        @if($beasiswaAktif->tanggal_berakhir)
+                            <p class="text-blue-200 text-xs">
+                                <i class="fas fa-calendar-check mr-1"></i> Berakhir: {{ $beasiswaAktif->tanggal_berakhir->format('d M Y') }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="bg-white rounded-2xl shadow-md p-6 mb-8 border-l-4 border-gray-300">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-3xl text-gray-400"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Tidak Ada Beasiswa Aktif</h3>
+                        <p class="text-gray-500">Anda saat ini tidak terdaftar dalam program beasiswa.</p>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- Info Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -90,30 +129,78 @@
                 </div>
             </div>
 
-            <!-- Semester Card -->
+            <!-- Kegiatan Card -->
             <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition duration-200">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-book text-white text-2xl"></i>
+                        <i class="fas fa-calendar-alt text-white text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm font-medium">Semester</p>
-                        <h3 class="text-xl font-bold text-gray-800">{{ date('Y') - $mahasiswa->tahun_masuk }} (Estimasi)</h3>
+                        <p class="text-gray-500 text-sm font-medium">Total Kegiatan</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $totalKegiatan }}</h3>
                     </div>
                 </div>
             </div>
 
-            <!-- SKS Card -->
+            <!-- Pengumuman Card -->
             <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition duration-200">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-award text-white text-2xl"></i>
+                        <i class="fas fa-bell text-white text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-gray-500 text-sm font-medium">SKS Diambil</p>
-                        <h3 class="text-xl font-bold text-gray-800">-</h3>
+                        <p class="text-gray-500 text-sm font-medium">Pengumuman Baru</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $pengumumanTerbaru->count() }}</h3>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Pengumuman Section -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-bullhorn text-orange-600"></i>
+                    Pengumuman Terbaru
+                </h3>
+                <a href="{{ route('mahasiswa.pengumuman.index') }}" class="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                    Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+            <div class="space-y-4">
+                @forelse($pengumumanTerbaru as $pengumuman)
+                    <a href="{{ route('mahasiswa.pengumuman.show', $pengumuman->id) }}" class="block">
+                        <div class="border-l-4 {{ $pengumuman->prioritas === 'tinggi' ? 'border-red-500 bg-red-50' : ($pengumuman->kategori === 'beasiswa' ? 'border-blue-500 bg-blue-50' : 'border-green-500 bg-green-50') }} p-4 rounded-r-lg hover:shadow-md transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xs font-semibold px-2 py-1 rounded {{ $pengumuman->kategori === 'beasiswa' ? 'bg-blue-200 text-blue-700' : ($pengumuman->kategori === 'akademik' ? 'bg-purple-200 text-purple-700' : 'bg-green-200 text-green-700') }}">
+                                            {{ ucfirst($pengumuman->kategori) }}
+                                        </span>
+                                        @if($pengumuman->prioritas === 'tinggi')
+                                            <span class="text-xs font-semibold px-2 py-1 rounded bg-red-200 text-red-700">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i> Penting
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">{{ $pengumuman->judul }}</h4>
+                                    <p class="text-gray-600 text-sm">{{ Str::limit($pengumuman->konten, 100) }}</p>
+                                    <p class="text-gray-400 text-xs mt-2">
+                                        <i class="fas fa-clock mr-1"></i>{{ $pengumuman->created_at->diffForHumans() }}
+                                    </p>
+                                </div>
+                                <div class="ml-4">
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                @empty
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-2 text-gray-300"></i>
+                        <p>Belum ada pengumuman.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 
@@ -178,48 +265,6 @@
                     </div>
                 </div>
             </a>
-
-            <a href="#" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100 opacity-60">
-                <div class="flex items-start gap-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200 shrink-0">
-                        <i class="fas fa-bell text-white text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-gray-800 group-hover:text-teal-600 transition mb-1">Pengumuman</h3>
-                        <p class="text-sm text-gray-500">Pengumuman terbaru</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <!-- Info Section -->
-        <div class="mt-8 bg-white rounded-xl shadow-md p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-info-circle text-green-600"></i>
-                Informasi Program Studi
-            </h3>
-            @if($mahasiswa->programStudi)
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-500 mb-1">Program Studi</p>
-                        <p class="font-semibold text-gray-800">{{ $mahasiswa->programStudi->nama }}</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-500 mb-1">Kode Prodi</p>
-                        <p class="font-semibold text-gray-800">{{ $mahasiswa->programStudi->kode }}</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-500 mb-1">Singkatan</p>
-                        <p class="font-semibold text-gray-800">{{ $mahasiswa->programStudi->singkatan ?? '-' }}</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <p class="text-sm text-gray-500 mb-1">Deskripsi</p>
-                        <p class="font-semibold text-gray-800">{{ Str::limit($mahasiswa->programStudi->deskripsi ?? 'Tidak ada deskripsi', 50) }}</p>
-                    </div>
-                </div>
-            @else
-                <p class="text-gray-500">Belum ada program studi yang ditetapkan.</p>
-            @endif
         </div>
     </div>
 

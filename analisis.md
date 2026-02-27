@@ -1,60 +1,41 @@
-🏗 1️⃣ Tabel Fakultas
-CREATE TABLE fakultas (
-    id_fakultas INT AUTO_INCREMENT PRIMARY KEY,
-    nama_fakultas VARCHAR(100) NOT NULL
-);
-🏗 2️⃣ Tabel Program Studi
-CREATE TABLE program_studi (
-    id_prodi INT AUTO_INCREMENT PRIMARY KEY,
-    nama_prodi VARCHAR(100) NOT NULL,
-    jenjang VARCHAR(10) NOT NULL,
-    id_fakultas INT NOT NULL,
-    FOREIGN KEY (id_fakultas) REFERENCES fakultas(id_fakultas)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
+sekarang saya ingin menambahkan beasiswa laporan di mahasiswa, tetapi khsusus yang beasiswa
 
-Relasi:
+0. Laporan data (wajib)
+    Semester : Pilihan 1-10
+    Tahun Ajar : 2025/2026 (buatkan masternya)
 
-1 Fakultas → banyak Program Studi
+1. Akademik (wajib)
+    SKS : input angka
+    Indeks Prestasi : input angka double 2 dibelakang koma
+    Link Hasil Studi : input berkas format pdf 
 
-🏗 3️⃣ Tabel Mahasiswa (Data Umum)
-CREATE TABLE mahasiswa (
-    nim VARCHAR(20) PRIMARY KEY,
-    nama VARCHAR(100) NOT NULL,
-    tanggal_lahir DATE,
-    alamat TEXT,
-    angkatan YEAR,
-    id_prodi INT NOT NULL,
-    status_mahasiswa ENUM('Reguler','Beasiswa') DEFAULT 'Reguler',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (id_prodi) REFERENCES program_studi(id_prodi)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-🏗 4️⃣ Tabel Mahasiswa Beasiswa (Data Tambahan)
+2. Referal (bisa kosong)
+    nama : 
+    no telp:
+    program studi:
 
-Mahasiswa yang menerima beasiswa akan memiliki data tambahan di tabel ini.
+    bisa lebih dari 1 referal
 
-CREATE TABLE mahasiswa_beasiswa (
-    id_beasiswa INT AUTO_INCREMENT PRIMARY KEY,
-    nim VARCHAR(20) NOT NULL,
-    jenis_beasiswa VARCHAR(100) NOT NULL,
-    nomor_sk VARCHAR(100),
-    tanggal_sk DATE,
-    nominal DECIMAL(15,2),
-    periode_mulai DATE,
-    periode_selesai DATE,
-    status_aktif BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (nim) REFERENCES mahasiswa(nim)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-🔁 Relasi Akhir
+3. Pendanaan (bisa kosong)
+    nama pendanaan :
+    Judul :
+    keterangan : lolos/tidak
+    sebagai : ketua/anggota
+    bukti : input berkas format pdf, jika banyak dijadikan 1 file
 
-fakultas (1) → (∞) program_studi
+    bisa lebih dari 1
 
-program_studi (1) → (∞) mahasiswa
+4. Kompetisi (bisa kosong)
+    nama pendanaan :
+    Judul :
+    Juara : Juara 1, 2, 3, atau terbaik atau tidak juara
+    sebagai : ketua/anggota
+    bukti : input berkas format pdf, jika banyak dijadikan 1 file
 
-mahasiswa (1) → (0..∞) mahasiswa_beasiswa
+    bisa lebih dari 1
+
+5. Publikasi (bisa Kosong)
+    Judul : 
+    Nama Tempat Publikasi : 
+    Link Jurnal : taturan link web
+    kategori : sinta 1-6, garuda, Q1-4

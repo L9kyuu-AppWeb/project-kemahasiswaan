@@ -197,9 +197,33 @@
                 </div>
             </a>
 
+            <a href="{{ route('admin.beasiswa.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                        <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 group-hover:text-teal-600 transition">Beasiswa</h3>
+                        <p class="text-sm text-gray-500">Kelola beasiswa</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ route('admin.pengumuman.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                        <i class="fas fa-bullhorn text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 group-hover:text-orange-600 transition">Pengumuman</h3>
+                        <p class="text-sm text-gray-500">Kelola pengumuman</p>
+                    </div>
+                </div>
+            </a>
+
             <a href="#" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100 opacity-50">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                    <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
                         <i class="fas fa-calendar-check text-white text-2xl"></i>
                     </div>
                     <div>
