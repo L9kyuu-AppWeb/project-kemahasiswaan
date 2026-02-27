@@ -1,66 +1,255 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Kemahasiswaan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Kemahasiswaan adalah platform terintegrasi berbasis web untuk pengelolaan kegiatan kemahasiswaan, termasuk beasiswa, magang, dan pengumuman akademik. Dibangun menggunakan Laravel framework.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 📋 Manajemen Beasiswa
+- **Jenis Beasiswa** - Kelola berbagai tipe beasiswa (aktif/tidak aktif)
+- **Data Penerima** - Catat dan kelola mahasiswa penerima beasiswa
+- **Laporan Akademik** - Monitor IPK, SKS, dan KHS mahasiswa penerima beasiswa
+- **Laporan Terkelola** - Laporan dikelompokkan per mahasiswa untuk memudahkan monitoring
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 💼 Manajemen Magang
+- **Penempatan Magang** - Kelola penempatan mahasiswa di perusahaan
+- **Laporan Kegiatan** - Monitor laporan harian/mingguan mahasiswa magang
+- **Log Kegiatan** - Detail aktivitas dengan bukti kegiatan (PDF)
+- **Verifikasi Laporan** - Approval dan review laporan magang
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 👨‍🎓 Manajemen Mahasiswa
+- **Data Mahasiswa** - CRUD data mahasiswa lengkap dengan program studi
+- **Program Studi** - Kelola data program studi/jurusan
 
-## Learning Laravel
+### 📢 Pengumuman
+- **Pengumuman Beasiswa** - Informasi pendaftaran dan hasil seleksi beasiswa
+- **Pengumuman Umum** - Informasi kegiatan kemahasiswaan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 📊 Sistem Laporan Terintegrasi
+- **Grouping by Mahasiswa** - Laporan dikelompokkan per mahasiswa
+- **Status Tracking** - Draft, Submitted, Approved, Rejected
+- **Export PDF** - Download laporan individual atau multiple
+- **Verifikasi Admin** - Proses approval dengan catatan
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 🔐 Multi-User Authentication
+- **Admin** - Administrator sistem
+- **Mahasiswa** - User mahasiswa dengan NIM
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Teknologi
 
-## Laravel Sponsors
+- **Backend**: Laravel 10.x
+- **Database**: MySQL
+- **Frontend**: Blade Templates + TailwindCSS
+- **Icons**: Font Awesome 6
+- **PDF Generation**: DomPDF
+- **Authentication**: Laravel Guard (Admin & Mahasiswa)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📦 Instalasi
 
-### Premium Partners
+### Prasyarat
+- PHP >= 8.1
+- Composer
+- MySQL/MariaDB
+- Node.js & NPM (opsional untuk asset compilation)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Langkah Instalasi
 
-## Contributing
+1. **Clone repository**
+```bash
+git clone <repository-url>
+cd project_kemahasiswaan
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install dependencies**
+```bash
+composer install
+npm install
+```
 
-## Code of Conduct
+3. **Setup environment**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Konfigurasi database** - Edit file `.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=project_kemahasiswaan
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Security Vulnerabilities
+5. **Jalankan migrasi dan seeder**
+```bash
+php artisan migrate --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Storage link** (untuk upload file)
+```bash
+php artisan storage:link
+```
 
-## License
+7. **Jalankan aplikasi**
+```bash
+php artisan serve
+```
+
+Aplikasi akan berjalan di `http://localhost:8000`
+
+## 📁 Struktur Database
+
+### Tabel Utama
+- `admins` - Data administrator
+- `mahasiswas` - Data mahasiswa
+- `program_studis` - Data program studi
+- `beasiswa_tipes` - Jenis/tipe beasiswa
+- `mahasiswa_beasiswas` - Mahasiswa penerima beasiswa
+- `laporan_beasiswas` - Laporan beasiswa mahasiswa
+- `laporan_akademiks` - Data akademik (IPK, SKS, KHS)
+- `laporan_referals` - Laporan referal
+- `laporan_pendanaans` - Laporan pendanaan/kompetisi
+- `laporan_kompetisis` - Laporan kompetisi
+- `laporan_publikasis` - Laporan publikasi
+- `mahasiswa_magangs` - Penempatan magang
+- `laporan_magangs` - Laporan magang
+- `log_kegiatans` - Log kegiatan magang
+- `bukti_kegiatans` - Bukti kegiatan (file)
+- `pengumumans` - Pengumuman
+- `tahun_ajars` - Tahun akademik
+
+## 🔑 Default Login
+
+### Admin
+```
+Email: admin@example.com
+Password: password
+```
+
+### Mahasiswa
+```
+NIM: 2024001
+Password: password
+```
+
+## 📸 Fitur Unggulan
+
+### 1. Laporan Beasiswa (Grouped)
+- Tampilan daftar laporan dikelompokkan per mahasiswa
+- Summary status: Draft, Submitted, Approved, Rejected
+- Detail laporan per mahasiswa dengan riwayat lengkap
+- Download PDF individual atau multiple
+
+### 2. Laporan Magang (Grouped)
+- Monitoring laporan magang per mahasiswa
+- Total laporan dan status summary
+- Log kegiatan dengan bukti PDF
+- Verifikasi dan approval laporan
+
+### 3. Manajemen Beasiswa
+- Master data jenis beasiswa
+- Transaksi penerima beasiswa per mahasiswa
+- Upload file SK beasiswa
+- Status aktif/tidak aktif
+
+## 🗂️ Struktur Folder Penting
+
+```
+app/
+├── Http/
+│   └── Controllers/
+│       ├── Admin/
+│       ├── BeasiswaController.php
+│       ├── LaporanController.php
+│       ├── LaporanMagangController.php
+│       ├── MahasiswaController.php
+│       └── ...
+├── Models/
+│   ├── LaporanBeasiswa.php
+│   ├── LaporanMagang.php
+│   ├── MahasiswaBeasiswa.php
+│   └── ...
+resources/
+├── views/
+│   ├── admin/
+│   │   ├── laporan/
+│   │   │   ├── index.blade.php (grouped)
+│   │   │   ├── mahasiswa-detail.blade.php
+│   │   │   └── show.blade.php
+│   │   ├── laporan-magang/
+│   │   │   ├── index.blade.php (grouped)
+│   │   │   ├── mahasiswa-detail.blade.php
+│   │   │   └── show.blade.php
+│   │   ├── beasiswa/
+│   │   └── ...
+│   ├── mahasiswa/
+│   └── home.blade.php
+```
+
+## 📝 Route Utama
+
+### Admin Routes (`/admin`)
+```php
+// Laporan Beasiswa
+GET  /admin/laporan              - Index (grouped by mahasiswa)
+GET  /admin/laporan/mahasiswa/{id} - Detail per mahasiswa
+GET  /admin/laporan/{id}         - Show detail laporan
+POST /admin/laporan/{id}/approve - Approve laporan
+POST /admin/laporan/{id}/reject  - Reject laporan
+
+// Laporan Magang
+GET  /admin/laporan-magang       - Index (grouped by mahasiswa)
+GET  /admin/laporan-magang/mahasiswa/{id} - Detail per mahasiswa
+GET  /admin/laporan-magang/{id}  - Show detail laporan
+POST /admin/laporan-magang/{id}/approve - Approve laporan
+POST /admin/laporan-magang/{id}/reject  - Reject laporan
+
+// Beasiswa
+GET  /admin/beasiswa/tipe        - Jenis beasiswa
+GET  /admin/beasiswa/data        - Data penerima beasiswa
+```
+
+### Mahasiswa Routes (`/mahasiswa`)
+```php
+// Laporan Beasiswa
+GET  /mahasiswa/laporan          - Daftar laporan
+POST /mahasiswa/laporan          - Store laporan
+POST /mahasiswa/laporan/{id}/submit - Submit laporan
+
+// Laporan Magang
+GET  /mahasiswa/laporan-magang   - Daftar laporan magang
+POST /mahasiswa/laporan-magang   - Store laporan magang
+```
+
+## 🔧 Commands
+
+```bash
+# Clear cache
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+
+# Optimize
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Database
+php artisan migrate
+php artisan migrate:rollback
+php artisan db:seed
+```
+
+## 📄 License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## 👥 Developer
+
+Sistem Kemahasiswaan - Platform terintegrasi untuk pengelolaan kegiatan kemahasiswaan.
+
+---
+
+**© 2026 Sistem Kemahasiswaan. All rights reserved.**
