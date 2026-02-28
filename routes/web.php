@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AntrianVerifikasiController;
 use App\Http\Controllers\BeasiswaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LaporanMagangController;
+use App\Http\Controllers\MahasiswaAntrianVerifikasiController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MahasiswaMagangController;
 use App\Http\Controllers\MahasiswaPengumumanController;
@@ -121,6 +123,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{laporanMagang}/approve', [LaporanMagangController::class, 'adminApprove'])->name('approve');
             Route::post('/{laporanMagang}/reject', [LaporanMagangController::class, 'adminReject'])->name('reject');
         });
+
+        // Antrian Verifikasi Management (Admin)
+        Route::prefix('antrian-verifikasi')->name('antrian-verifikasi.')->group(function () {
+            Route::get('/', [AntrianVerifikasiController::class, 'index'])->name('index');
+            Route::get('/create', [AntrianVerifikasiController::class, 'create'])->name('create');
+            Route::post('/', [AntrianVerifikasiController::class, 'store'])->name('store');
+            Route::get('/{antrianVerifikasi}', [AntrianVerifikasiController::class, 'show'])->name('show');
+            Route::get('/{antrianVerifikasi}/edit', [AntrianVerifikasiController::class, 'edit'])->name('edit');
+            Route::put('/{antrianVerifikasi}', [AntrianVerifikasiController::class, 'update'])->name('update');
+            Route::delete('/{antrianVerifikasi}', [AntrianVerifikasiController::class, 'destroy'])->name('destroy');
+            Route::post('/detail/{detailId}/mark-attendance', [AntrianVerifikasiController::class, 'markAttendance'])->name('mark-attendance');
+            Route::post('/detail/{detailId}/update-status', [AntrianVerifikasiController::class, 'updateStatus'])->name('update-status');
+            Route::post('/detail/{detailId}/cancel', [AntrianVerifikasiController::class, 'cancelRegistration'])->name('cancel');
+        });
     });
 });
 
@@ -158,6 +174,16 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
             Route::put('/{laporan}', [LaporanMagangController::class, 'update'])->name('update');
             Route::post('/{laporan}/submit', [LaporanMagangController::class, 'submit'])->name('submit');
             Route::delete('/{laporan}', [LaporanMagangController::class, 'destroy'])->name('destroy');
+        });
+
+        // Antrian Verifikasi Routes for Mahasiswa
+        Route::prefix('antrian-verifikasi')->name('antrian-verifikasi.')->group(function () {
+            Route::get('/', [MahasiswaAntrianVerifikasiController::class, 'index'])->name('index');
+            Route::get('/{id}/register', [MahasiswaAntrianVerifikasiController::class, 'register'])->name('register');
+            Route::post('/{id}/register', [MahasiswaAntrianVerifikasiController::class, 'store'])->name('store');
+            Route::get('/bukti/{id}', [MahasiswaAntrianVerifikasiController::class, 'bukti'])->name('bukti');
+            Route::get('/bukti/{id}/download', [MahasiswaAntrianVerifikasiController::class, 'downloadBukti'])->name('download-bukti');
+            Route::post('/{id}/cancel', [MahasiswaAntrianVerifikasiController::class, 'cancel'])->name('cancel');
         });
     });
 });
