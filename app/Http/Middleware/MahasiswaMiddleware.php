@@ -17,7 +17,7 @@ class MahasiswaMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('mahasiswa')->check()) {
-            return redirect()->route('mahasiswa.login');
+            return redirect()->route('login');
         }
 
         return $next($request);

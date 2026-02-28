@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
+use App\Models\ProgramStudi;
+use App\Imports\MahasiswaImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
 
 class MahasiswaController extends Controller
 {
@@ -47,6 +51,83 @@ class MahasiswaController extends Controller
         $programStudiList = \App\Models\ProgramStudi::orderBy('nama')->get();
 
         return view('admin.mahasiswa.index', compact('mahasiswas', 'tahunList', 'programStudiList'));
+    }
+
+    /**
+     * Show form for importing mahasiswa from Excel.
+     */
+    public function showImportForm()
+    {
+        $programStudiList = ProgramStudi::orderBy('nama')->get();
+        return view('admin.mahasiswa.import', compact('programStudiList'));
+    }
+
+    /**
+     * Import mahasiswa from Excel file.
+     */
+    public function importExcel(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            $file = $request->file('file');
+            
+            // Import Excel
+            $import = new MahasiswaImport;
+            Excel::import($import, $file);
+
+            // Check for failures
+            $failures = $import->failures();
+            
+            if ($failures->isNotEmpty()) {
+                // There were some failures, show them
+                $failureMessages = [];
+                foreach ($failures as $failure) {
+                    $failureMessages[] = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
+                }
+                
+                return redirect()->back()
+                    ->with('warning', 'Sebagian data gagal diimport.')
+                    ->with('failures', $failureMessages);
+            }
+
+            return redirect()->route('admin.mahasiswa.index')
+                ->with('success', 'Mahasiswa berhasil diimport dari Excel. Data dengan NIM atau email yang sudah ada akan dilewati.');
+
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $failureMessages = [];
+            
+            foreach ($failures as $failure) {
+                $failureMessages[] = "Baris {$failure->row()}: " . implode(', ', $failure->errors());
+            }
+            
+            return redirect()->back()
+                ->with('error', 'Validasi gagal. Silakan perbaiki data Anda.')
+                ->with('failures', $failureMessages);
+        } catch (\RuntimeException $e) {
+            return redirect()->back()
+                ->with('error', 'Error: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat mengimport file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Excel template.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new \App\Exports\MahasiswaTemplateExport, 'template_mahasiswa.xlsx');
     }
 
     /**

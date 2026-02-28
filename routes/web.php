@@ -45,6 +45,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/profile', [AuthController::class, 'adminProfileUpdate'])->name('profile.update');
 
         // Mahasiswa Management
+        // Import Excel routes for Mahasiswa (MUST be before resource route)
+        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+            Route::get('/import', [MahasiswaController::class, 'showImportForm'])->name('import');
+            Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import-excel');
+            Route::get('/download-template', [MahasiswaController::class, 'downloadTemplate'])->name('download-template');
+        });
         Route::resource('mahasiswa', MahasiswaController::class);
         
         // Program Studi Management

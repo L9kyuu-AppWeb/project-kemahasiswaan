@@ -46,11 +46,18 @@
                     </h2>
                     <p class="text-green-100 text-sm">Kelola data mahasiswa dengan mudah</p>
                 </div>
-                <a href="{{ route('admin.mahasiswa.create') }}"
-                   class="bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
-                    <i class="fas fa-plus-circle"></i>
-                    Tambah Mahasiswa
-                </a>
+                <div class="flex gap-3">
+                    <a href="{{ route('admin.mahasiswa.import') }}"
+                       class="bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-file-excel"></i>
+                        Import Excel
+                    </a>
+                    <a href="{{ route('admin.mahasiswa.create') }}"
+                       class="bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
+                        <i class="fas fa-plus-circle"></i>
+                        Tambah Mahasiswa
+                    </a>
+                </div>
             </div>
         </div>
 
