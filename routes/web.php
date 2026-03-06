@@ -4,14 +4,19 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AntrianVerifikasiController;
 use App\Http\Controllers\BeasiswaController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JenisRekognisiController;
+use App\Http\Controllers\KompetisiMahasiswaDosenController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LaporanMagangController;
+use App\Http\Controllers\LombaKategoriController;
 use App\Http\Controllers\MahasiswaAntrianVerifikasiController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MahasiswaMagangController;
 use App\Http\Controllers\MahasiswaPengumumanController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\ProgramStudiController;
+use App\Http\Controllers\RekognisiController;
+use App\Http\Controllers\SertifikasiController;
 use App\Http\Controllers\TahunAjarController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +64,57 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('program-studi', ProgramStudiController::class)->parameters([
             'program-studi' => 'programStudi'
         ]);
+
+        // Lomba Kategori Management
+        Route::prefix('lomba-kategori')->name('lomba-kategori.')->group(function () {
+            Route::get('/', [LombaKategoriController::class, 'index'])->name('index');
+            Route::get('/create', [LombaKategoriController::class, 'create'])->name('create');
+            Route::post('/', [LombaKategoriController::class, 'store'])->name('store');
+            Route::get('/{lombaKategori}', [LombaKategoriController::class, 'show'])->name('show');
+            Route::get('/{lombaKategori}/edit', [LombaKategoriController::class, 'edit'])->name('edit');
+            Route::put('/{lombaKategori}', [LombaKategoriController::class, 'update'])->name('update');
+            Route::delete('/{lombaKategori}', [LombaKategoriController::class, 'destroy'])->name('destroy');
+        });
+
+        // Kompetisi Mahasiswa Management
+        Route::prefix('kompetisi')->name('kompetisi.')->group(function () {
+            Route::get('/', [KompetisiMahasiswaDosenController::class, 'adminIndex'])->name('index');
+            Route::get('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'adminShow'])->name('show');
+            Route::get('/{kompetisi}/edit', [KompetisiMahasiswaDosenController::class, 'adminEdit'])->name('edit');
+            Route::put('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'adminUpdate'])->name('update');
+            Route::delete('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'adminDestroy'])->name('destroy');
+            Route::post('/{kompetisi}/approve', [KompetisiMahasiswaDosenController::class, 'adminApprove'])->name('approve');
+        });
+
+        // Jenis Rekognisi Management
+        Route::prefix('jenis-rekognisi')->name('jenis-rekognisi.')->group(function () {
+            Route::get('/', [JenisRekognisiController::class, 'index'])->name('index');
+            Route::get('/create', [JenisRekognisiController::class, 'create'])->name('create');
+            Route::post('/', [JenisRekognisiController::class, 'store'])->name('store');
+            Route::get('/{jenisRekognisi}/edit', [JenisRekognisiController::class, 'edit'])->name('edit');
+            Route::put('/{jenisRekognisi}', [JenisRekognisiController::class, 'update'])->name('update');
+            Route::delete('/{jenisRekognisi}', [JenisRekognisiController::class, 'destroy'])->name('destroy');
+        });
+
+        // Rekognisi Management
+        Route::prefix('rekognisi')->name('rekognisi.')->group(function () {
+            Route::get('/', [RekognisiController::class, 'adminIndex'])->name('index');
+            Route::get('/{rekognisi}', [RekognisiController::class, 'adminShow'])->name('show');
+            Route::get('/{rekognisi}/edit', [RekognisiController::class, 'adminEdit'])->name('edit');
+            Route::put('/{rekognisi}', [RekognisiController::class, 'adminUpdate'])->name('update');
+            Route::delete('/{rekognisi}', [RekognisiController::class, 'adminDestroy'])->name('destroy');
+            Route::post('/{rekognisi}/approve', [RekognisiController::class, 'adminApprove'])->name('approve');
+        });
+
+        // Sertifikasi Management
+        Route::prefix('sertifikasi')->name('sertifikasi.')->group(function () {
+            Route::get('/', [SertifikasiController::class, 'adminIndex'])->name('index');
+            Route::get('/{sertifikasi}', [SertifikasiController::class, 'adminShow'])->name('show');
+            Route::get('/{sertifikasi}/edit', [SertifikasiController::class, 'adminEdit'])->name('edit');
+            Route::put('/{sertifikasi}', [SertifikasiController::class, 'adminUpdate'])->name('update');
+            Route::delete('/{sertifikasi}', [SertifikasiController::class, 'adminDestroy'])->name('destroy');
+            Route::post('/{sertifikasi}/approve', [SertifikasiController::class, 'adminApprove'])->name('approve');
+        });
 
         // Beasiswa Management
         Route::prefix('beasiswa')->name('beasiswa.')->group(function () {
@@ -184,6 +240,39 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
             Route::get('/bukti/{id}', [MahasiswaAntrianVerifikasiController::class, 'bukti'])->name('bukti');
             Route::get('/bukti/{id}/download', [MahasiswaAntrianVerifikasiController::class, 'downloadBukti'])->name('download-bukti');
             Route::post('/{id}/cancel', [MahasiswaAntrianVerifikasiController::class, 'cancel'])->name('cancel');
+        });
+
+        // Kompetisi Routes for Mahasiswa
+        Route::prefix('kompetisi')->name('kompetisi.')->group(function () {
+            Route::get('/', [KompetisiMahasiswaDosenController::class, 'index'])->name('index');
+            Route::get('/create', [KompetisiMahasiswaDosenController::class, 'create'])->name('create');
+            Route::post('/', [KompetisiMahasiswaDosenController::class, 'store'])->name('store');
+            Route::get('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'show'])->name('show');
+            Route::get('/{kompetisi}/edit', [KompetisiMahasiswaDosenController::class, 'edit'])->name('edit');
+            Route::put('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'update'])->name('update');
+            Route::delete('/{kompetisi}', [KompetisiMahasiswaDosenController::class, 'destroy'])->name('destroy');
+        });
+
+        // Rekognisi Routes for Mahasiswa
+        Route::prefix('rekognisi')->name('rekognisi.')->group(function () {
+            Route::get('/', [RekognisiController::class, 'index'])->name('index');
+            Route::get('/create', [RekognisiController::class, 'create'])->name('create');
+            Route::post('/', [RekognisiController::class, 'store'])->name('store');
+            Route::get('/{rekognisi}', [RekognisiController::class, 'show'])->name('show');
+            Route::get('/{rekognisi}/edit', [RekognisiController::class, 'edit'])->name('edit');
+            Route::put('/{rekognisi}', [RekognisiController::class, 'update'])->name('update');
+            Route::delete('/{rekognisi}', [RekognisiController::class, 'destroy'])->name('destroy');
+        });
+
+        // Sertifikasi Routes for Mahasiswa
+        Route::prefix('sertifikasi')->name('sertifikasi.')->group(function () {
+            Route::get('/', [SertifikasiController::class, 'index'])->name('index');
+            Route::get('/create', [SertifikasiController::class, 'create'])->name('create');
+            Route::post('/', [SertifikasiController::class, 'store'])->name('store');
+            Route::get('/{sertifikasi}', [SertifikasiController::class, 'show'])->name('show');
+            Route::get('/{sertifikasi}/edit', [SertifikasiController::class, 'edit'])->name('edit');
+            Route::put('/{sertifikasi}', [SertifikasiController::class, 'update'])->name('update');
+            Route::delete('/{sertifikasi}', [SertifikasiController::class, 'destroy'])->name('destroy');
         });
     });
 });

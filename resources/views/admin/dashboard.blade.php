@@ -304,6 +304,66 @@
                     </div>
                 </a>
 
+                <a href="{{ route('admin.lomba-kategori.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-trophy text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-pink-600 transition">Kategori Lomba</h3>
+                            <p class="text-sm text-gray-500">Kelola kategori lomba</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.jenis-rekognisi.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-certificate text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-cyan-600 transition">Jenis Rekognisi</h3>
+                            <p class="text-sm text-gray-500">Kelola jenis rekognisi</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.kompetisi.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-medal text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-emerald-600 transition">Kompetisi Mahasiswa</h3>
+                            <p class="text-sm text-gray-500">Verifikasi prestasi</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.rekognisi.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-award text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-indigo-600 transition">Rekognisi</h3>
+                            <p class="text-sm text-gray-500">Verifikasi rekognisi</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.sertifikasi.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-certificate text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-violet-600 transition">Sertifikasi</h3>
+                            <p class="text-sm text-gray-500">Verifikasi sertifikasi</p>
+                        </div>
+                    </div>
+                </a>
+
                 <a href="#" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100 opacity-50">
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
