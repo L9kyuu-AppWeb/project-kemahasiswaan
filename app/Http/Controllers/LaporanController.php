@@ -25,6 +25,24 @@ class LaporanController extends Controller
     public function index()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
+        $today = now()->format('Y-m-d');
+        
+        // Check if mahasiswa has active beasiswa (status aktif, tanggal_mulai <= today, tanggal_berakhir is null OR >= today)
+        $beasiswaAktif = MahasiswaBeasiswa::with('beasiswaTipe')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'aktif')
+            ->where('tanggal_mulai', '<=', $today)
+            ->where(function($query) use ($today) {
+                $query->whereNull('tanggal_berakhir')
+                      ->orWhere('tanggal_berakhir', '>=', $today);
+            })
+            ->first();
+
+        if (!$beasiswaAktif) {
+            return redirect()->route('mahasiswa.dashboard')
+                ->with('error', 'Anda tidak memiliki beasiswa aktif. Silakan hubungi administrator.');
+        }
+
         $laporans = LaporanBeasiswa::with(['tahunAjar', 'beasiswaTipe'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->latest()
@@ -190,11 +208,21 @@ class LaporanController extends Controller
     public function create()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $beasiswaTipe = $mahasiswa->beasiswas()->where('status', 'aktif')->first();
+        $today = now()->format('Y-m-d');
+        
+        // Check if mahasiswa has active beasiswa (status aktif, tanggal_mulai <= today, tanggal_berakhir is null OR >= today)
+        $beasiswaAktif = MahasiswaBeasiswa::with('beasiswaTipe')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'aktif')
+            ->where('tanggal_mulai', '<=', $today)
+            ->where(function($query) use ($today) {
+                $query->whereNull('tanggal_berakhir')
+                      ->orWhere('tanggal_berakhir', '>=', $today);
+            })
+            ->first();
 
-        // Check if mahasiswa has active beasiswa
-        if (!$beasiswaTipe) {
-            return redirect()->route('mahasiswa.laporan.index')
+        if (!$beasiswaAktif) {
+            return redirect()->route('mahasiswa.dashboard')
                 ->with('error', 'Anda tidak memiliki beasiswa aktif.');
         }
 
@@ -202,7 +230,7 @@ class LaporanController extends Controller
         $tahunAjarAktif = TahunAjar::where('is_active', true)->first();
 
         if (!$tahunAjarAktif) {
-            return redirect()->route('mahasiswa.laporan.index')
+            return redirect()->route('mahasiswa.dashboard')
                 ->with('error', 'Tidak ada tahun ajar aktif. Silakan hubungi administrator.');
         }
 
@@ -219,7 +247,7 @@ class LaporanController extends Controller
                 'submitted' => 'sudah dikirim dan sedang direview',
                 'approved' => 'sudah disetujui'
             ];
-            
+
             return redirect()->route('mahasiswa.laporan.index')
                 ->with('error', 'Anda sudah memiliki laporan untuk tahun ajar ' . $tahunAjarAktif->nama . ' yang ' . $statusText[$existingLaporan->status] . '. Anda hanya bisa membuat laporan baru jika laporan sebelumnya ditolak.');
         }
@@ -235,10 +263,21 @@ class LaporanController extends Controller
     public function store(Request $request)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $beasiswaTipe = $mahasiswa->beasiswas()->where('status', 'aktif')->first();
+        $today = now()->format('Y-m-d');
+        
+        // Check if mahasiswa has active beasiswa (status aktif, tanggal_mulai <= today, tanggal_berakhir is null OR >= today)
+        $beasiswaAktif = MahasiswaBeasiswa::with('beasiswaTipe')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'aktif')
+            ->where('tanggal_mulai', '<=', $today)
+            ->where(function($query) use ($today) {
+                $query->whereNull('tanggal_berakhir')
+                      ->orWhere('tanggal_berakhir', '>=', $today);
+            })
+            ->first();
 
-        if (!$beasiswaTipe) {
-            return redirect()->route('mahasiswa.laporan.index')
+        if (!$beasiswaAktif) {
+            return redirect()->route('mahasiswa.dashboard')
                 ->with('error', 'Anda tidak memiliki beasiswa aktif.');
         }
 
@@ -300,7 +339,7 @@ class LaporanController extends Controller
         // Create laporan beasiswa
         $laporan = LaporanBeasiswa::create([
             'mahasiswa_id' => $mahasiswa->id,
-            'beasiswa_tipe_id' => $beasiswaTipe->beasiswa_tipe_id,
+            'beasiswa_tipe_id' => $beasiswaAktif->beasiswa_tipe_id,
             'tahun_ajar_id' => $validated['tahun_ajar_id'],
             'semester' => $validated['semester'],
             'status' => 'draft',

@@ -113,25 +113,42 @@ class AuthController extends Controller
     public function mahasiswaDashboard()
     {
         $mahasiswa = auth()->guard('mahasiswa')->user();
-        
-        // Get beasiswa status
+        $today = now()->format('Y-m-d');
+
+        // Get beasiswa status - cek tanggal_mulai <= today dan (tanggal_berakhir is null OR tanggal_berakhir >= today)
         $beasiswaAktif = \App\Models\MahasiswaBeasiswa::with('beasiswaTipe')
             ->where('mahasiswa_id', $mahasiswa->id)
             ->where('status', 'aktif')
+            ->where('tanggal_mulai', '<=', $today)
+            ->where(function($query) use ($today) {
+                $query->whereNull('tanggal_berakhir')
+                      ->orWhere('tanggal_berakhir', '>=', $today);
+            })
             ->first();
-        
+
+        // Get magang status - cek tanggal_mulai <= today dan (tanggal_selesai is null OR tanggal_selesai >= today)
+        $magangAktif = \App\Models\MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
+            ->where('status', 'aktif')
+            ->where('tanggal_mulai', '<=', $today)
+            ->where(function($query) use ($today) {
+                $query->whereNull('tanggal_selesai')
+                      ->orWhere('tanggal_selesai', '>=', $today);
+            })
+            ->first();
+
         // Get kegiatan count
         $totalKegiatan = \App\Models\Kegiatan::where('is_published', true)->count();
-        
+
         // Get pengumuman terbaru
         $pengumumanTerbaru = \App\Models\Pengumuman::where('is_published', true)
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
-        
+
         return view('mahasiswa.dashboard', compact(
             'mahasiswa',
             'beasiswaAktif',
+            'magangAktif',
             'totalKegiatan',
             'pengumumanTerbaru'
         ));
