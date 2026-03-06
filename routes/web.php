@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AntrianVerifikasiController;
 use App\Http\Controllers\BeasiswaController;
+use App\Http\Controllers\DetailKegiatanController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JenisKegiatanController;
 use App\Http\Controllers\JenisRekognisiController;
 use App\Http\Controllers\KompetisiMahasiswaDosenController;
 use App\Http\Controllers\LaporanController;
@@ -13,9 +15,11 @@ use App\Http\Controllers\MahasiswaAntrianVerifikasiController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\MahasiswaMagangController;
 use App\Http\Controllers\MahasiswaPengumumanController;
+use App\Http\Controllers\NilaiKegiatanController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\ProgramStudiController;
 use App\Http\Controllers\RekognisiController;
+use App\Http\Controllers\RuangLingkupController;
 use App\Http\Controllers\SertifikasiController;
 use App\Http\Controllers\TahunAjarController;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +118,52 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{sertifikasi}', [SertifikasiController::class, 'adminUpdate'])->name('update');
             Route::delete('/{sertifikasi}', [SertifikasiController::class, 'adminDestroy'])->name('destroy');
             Route::post('/{sertifikasi}/approve', [SertifikasiController::class, 'adminApprove'])->name('approve');
+        });
+
+        // Master Data Kegiatan Management
+        Route::prefix('master-kegiatan')->name('master-kegiatan.')->group(function () {
+            // Jenis Kegiatan
+            Route::prefix('jenis')->name('jenis.')->group(function () {
+                Route::get('/', [JenisKegiatanController::class, 'index'])->name('index');
+                Route::get('/create', [JenisKegiatanController::class, 'create'])->name('create');
+                Route::post('/', [JenisKegiatanController::class, 'store'])->name('store');
+                Route::get('/{jenisKegiatan}/edit', [JenisKegiatanController::class, 'edit'])->name('edit');
+                Route::put('/{jenisKegiatan}', [JenisKegiatanController::class, 'update'])->name('update');
+                Route::delete('/{jenisKegiatan}', [JenisKegiatanController::class, 'destroy'])->name('destroy');
+            });
+
+            // Ruang Lingkup
+            Route::prefix('ruang-lingkup')->name('ruang-lingkup.')->group(function () {
+                Route::get('/', [RuangLingkupController::class, 'index'])->name('index');
+                Route::get('/create', [RuangLingkupController::class, 'create'])->name('create');
+                Route::post('/', [RuangLingkupController::class, 'store'])->name('store');
+                Route::get('/{ruangLingkup}/edit', [RuangLingkupController::class, 'edit'])->name('edit');
+                Route::put('/{ruangLingkup}', [RuangLingkupController::class, 'update'])->name('update');
+                Route::delete('/{ruangLingkup}', [RuangLingkupController::class, 'destroy'])->name('destroy');
+            });
+
+            // Detail Kegiatan
+            Route::prefix('detail')->name('detail.')->group(function () {
+                Route::get('/', [DetailKegiatanController::class, 'index'])->name('index');
+                Route::get('/create', [DetailKegiatanController::class, 'create'])->name('create');
+                Route::post('/', [DetailKegiatanController::class, 'store'])->name('store');
+                Route::get('/{detailKegiatan}/edit', [DetailKegiatanController::class, 'edit'])->name('edit');
+                Route::put('/{detailKegiatan}', [DetailKegiatanController::class, 'update'])->name('update');
+                Route::delete('/{detailKegiatan}', [DetailKegiatanController::class, 'destroy'])->name('destroy');
+            });
+
+            // Nilai Kegiatan
+            Route::prefix('nilai')->name('nilai.')->group(function () {
+                Route::get('/', [NilaiKegiatanController::class, 'index'])->name('index');
+                Route::get('/create', [NilaiKegiatanController::class, 'create'])->name('create');
+                Route::post('/', [NilaiKegiatanController::class, 'store'])->name('store');
+                Route::get('/{nilaiKegiatan}/edit', [NilaiKegiatanController::class, 'edit'])->name('edit');
+                Route::put('/{nilaiKegiatan}', [NilaiKegiatanController::class, 'update'])->name('update');
+                Route::delete('/{nilaiKegiatan}', [NilaiKegiatanController::class, 'destroy'])->name('destroy');
+            });
+
+            // API for dynamic dropdown
+            Route::get('/api/detail-kegiatan', [NilaiKegiatanController::class, 'getDetails']);
         });
 
         // Beasiswa Management

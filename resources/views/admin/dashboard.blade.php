@@ -364,14 +364,57 @@
                     </div>
                 </a>
 
-                <a href="#" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100 opacity-50">
+                <div class="col-span-full">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-database text-indigo-600"></i>
+                        Master Data Kegiatan
+                    </h3>
+                </div>
+
+                <a href="{{ route('admin.master-kegiatan.jenis.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
                     <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
-                            <i class="fas fa-calendar-check text-white text-2xl"></i>
+                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-list text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-800">Kegiatan</h3>
-                            <p class="text-sm text-gray-500">Segera hadir</p>
+                            <h3 class="font-bold text-gray-800 group-hover:text-indigo-600 transition">Jenis Kegiatan</h3>
+                            <p class="text-sm text-gray-500">Kelola jenis kegiatan</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.master-kegiatan.ruang-lingkup.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-globe text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-cyan-600 transition">Ruang Lingkup</h3>
+                            <p class="text-sm text-gray-500">Kelola ruang lingkup</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.master-kegiatan.detail.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-teal-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-tasks text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-teal-600 transition">Detail Kegiatan</h3>
+                            <p class="text-sm text-gray-500">Kelola detail kegiatan</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('admin.master-kegiatan.nilai.index') }}" class="group bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition duration-200 border border-gray-100">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition duration-200">
+                            <i class="fas fa-star text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 group-hover:text-orange-600 transition">Nilai Kegiatan</h3>
+                            <p class="text-sm text-gray-500">Kelola nilai/point</p>
                         </div>
                     </div>
                 </a>
