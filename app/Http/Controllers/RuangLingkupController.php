@@ -26,7 +26,7 @@ class RuangLingkupController extends Controller
 
         RuangLingkup::create($validated);
 
-        return redirect()->route('admin.ruang-lingkup.index')
+        return redirect()->route('admin.master-kegiatan.ruang-lingkup.index')
             ->with('success', 'Ruang lingkup berhasil ditambahkan.');
     }
 
@@ -43,7 +43,7 @@ class RuangLingkupController extends Controller
 
         $ruangLingkup->update($validated);
 
-        return redirect()->route('admin.ruang-lingkup.index')
+        return redirect()->route('admin.master-kegiatan.ruang-lingkup.index')
             ->with('success', 'Ruang lingkup berhasil diperbarui.');
     }
 
@@ -51,7 +51,7 @@ class RuangLingkupController extends Controller
     {
         $ruangLingkup->delete();
 
-        return redirect()->route('admin.ruang-lingkup.index')
+        return redirect()->route('admin.master-kegiatan.ruang-lingkup.index')
             ->with('success', 'Ruang lingkup berhasil dihapus.');
     }
 }

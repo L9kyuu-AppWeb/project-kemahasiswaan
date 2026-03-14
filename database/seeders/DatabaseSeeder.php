@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PengumumanSeeder::class,
             AdminSeeder::class,
             MahasiswaSeeder::class,
+            MasterKegiatanSeeder::class,
         ]);
     }
 }

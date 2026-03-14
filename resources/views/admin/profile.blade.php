@@ -1,36 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <nav class="bg-blue-600 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-                <div class="flex items-center space-x-4">
-                    <span class="text-blue-100">{{ auth()->guard('admin')->user()->name }}</span>
-                    <form action="{{ route('admin.logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition duration-200">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+@extends('layouts.app')
 
-    <div class="max-w-3xl mx-auto mt-8 px-4">
+@section('title', 'Profil Admin')
+
+@section('content')
+    <div class="max-w-3xl mx-auto">
         <div class="bg-white rounded-lg shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
+            <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">Profil Admin</h2>
-                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">
-                    &larr; Kembali ke Dashboard
-                </a>
             </div>
 
             @if (session('success'))
@@ -92,5 +68,4 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+@endsection

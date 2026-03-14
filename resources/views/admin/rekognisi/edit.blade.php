@@ -75,19 +75,6 @@
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Level <span class="text-red-500">*</span></label>
-                                <select name="level" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
-                                    <option value="">Pilih Level</option>
-                                    <option value="Provinsi" {{ old('level', $rekognisi->level) == 'Provinsi' ? 'selected' : '' }}>Provinsi</option>
-                                    <option value="Nasional" {{ old('level', $rekognisi->level) == 'Nasional' ? 'selected' : '' }}>Nasional</option>
-                                    <option value="Internasional" {{ old('level', $rekognisi->level) == 'Internasional' ? 'selected' : '' }}>Internasional</option>
-                                </select>
-                                @error('level')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Jenis Rekognisi <span class="text-red-500">*</span></label>
                                 <select name="jenis_rekognisi_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500" required>
                                     <option value="">Pilih Jenis</option>

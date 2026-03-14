@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sertifikasi;
+use App\Models\JenisKegiatan;
+use App\Models\DetailKegiatan;
+use App\Models\RuangLingkup;
+use App\Models\NilaiKegiatan;
+use App\Rules\ValidCertificateDate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -13,14 +18,10 @@ class SertifikasiController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $query = Sertifikasi::latest();
+        $query = Sertifikasi::with('mahasiswa')->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-
-        if ($request->filled('level')) {
-            $query->where('level', $request->level);
         }
 
         $sertifikasis = $query->paginate(15);
@@ -41,7 +42,6 @@ class SertifikasiController extends Controller
     public function adminUpdate(Request $request, Sertifikasi $sertifikasi)
     {
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_sertifikasi' => 'required|string|max:255',
             'nama_penyelenggara' => 'required|string|max:255',
             'url_sertifikasi' => 'nullable|url|max:500',
@@ -49,11 +49,8 @@ class SertifikasiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'url_surat_tugas' => 'nullable|url|max:500',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nim' => 'required|string|max:20',
-            'nama_mahasiswa' => 'required|string|max:150',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
         ]);
 
         if ($request->hasFile('dokumen_sertifikat')) {
@@ -113,7 +110,10 @@ class SertifikasiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        $sertifikasis = Sertifikasi::where('nim', $mahasiswa->nim)->latest()->paginate(15);
+        $sertifikasis = Sertifikasi::where('mahasiswa_id', $mahasiswa->id)
+            ->with('mahasiswa')
+            ->latest()
+            ->paginate(15);
 
         return view('mahasiswa.sertifikasi.index', compact('sertifikasis'));
     }
@@ -121,8 +121,10 @@ class SertifikasiController extends Controller
     public function create()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
+        $jenisKegiatans = \App\Models\JenisKegiatan::orderBy('id')->get();
 
-        return view('mahasiswa.sertifikasi.create', compact('mahasiswa'));
+        return view('mahasiswa.sertifikasi.create', compact('mahasiswa', 'dosens', 'jenisKegiatans'));
     }
 
     public function store(Request $request)
@@ -130,7 +132,6 @@ class SertifikasiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_sertifikasi' => 'required|string|max:255',
             'nama_penyelenggara' => 'required|string|max:255',
             'url_sertifikasi' => 'nullable|url|max:500',
@@ -138,9 +139,8 @@ class SertifikasiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'url_surat_tugas' => 'nullable|url|max:500',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
         ]);
 
         $dokumenSertifikatPath = $request->file('dokumen_sertifikat')->store('sertifikasi/sertifikat', 'public');
@@ -153,7 +153,6 @@ class SertifikasiController extends Controller
         $dokumenBuktiPath = $request->file('dokumen_bukti')->store('sertifikasi/dokumen_bukti', 'public');
 
         Sertifikasi::create([
-            'level' => $validated['level'],
             'nama_sertifikasi' => $validated['nama_sertifikasi'],
             'nama_penyelenggara' => $validated['nama_penyelenggara'],
             'url_sertifikasi' => $validated['url_sertifikasi'],
@@ -161,10 +160,8 @@ class SertifikasiController extends Controller
             'foto_kegiatan' => $fotoKegiatanPath,
             'dokumen_bukti' => $dokumenBuktiPath,
             'tanggal_sertifikat' => $validated['tanggal_sertifikat'],
-            'nim' => $mahasiswa->nim,
-            'nama_mahasiswa' => $mahasiswa->nama,
-            'nidn_nuptk' => $validated['nidn_nuptk'],
-            'nama_dosen' => $validated['nama_dosen'],
+            'mahasiswa_id' => $mahasiswa->id,
+            'dosen_id' => $validated['dosen_id'],
             'url_surat_tugas' => $validated['url_surat_tugas'],
             'status' => 'pending',
         ]);
@@ -176,7 +173,7 @@ class SertifikasiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        if ($sertifikasi->nim !== $mahasiswa->nim) {
+        if ($sertifikasi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -187,7 +184,7 @@ class SertifikasiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        if ($sertifikasi->nim !== $mahasiswa->nim) {
+        if ($sertifikasi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -195,14 +192,16 @@ class SertifikasiController extends Controller
             return redirect()->route('mahasiswa.sertifikasi.index')->with('error', 'Data yang sudah diverifikasi tidak dapat diedit.');
         }
 
-        return view('mahasiswa.sertifikasi.edit', compact('sertifikasi'));
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
+
+        return view('mahasiswa.sertifikasi.edit', compact('sertifikasi', 'dosens'));
     }
 
     public function update(Request $request, Sertifikasi $sertifikasi)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        if ($sertifikasi->nim !== $mahasiswa->nim) {
+        if ($sertifikasi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -211,7 +210,6 @@ class SertifikasiController extends Controller
         }
 
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_sertifikasi' => 'required|string|max:255',
             'nama_penyelenggara' => 'required|string|max:255',
             'url_sertifikasi' => 'nullable|url|max:500',
@@ -219,9 +217,8 @@ class SertifikasiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'url_surat_tugas' => 'nullable|url|max:500',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
         ]);
 
         if ($request->hasFile('dokumen_sertifikat')) {
@@ -260,7 +257,7 @@ class SertifikasiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        if ($sertifikasi->nim !== $mahasiswa->nim) {
+        if ($sertifikasi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -275,5 +272,32 @@ class SertifikasiController extends Controller
         $sertifikasi->delete();
 
         return redirect()->route('mahasiswa.sertifikasi.index')->with('success', 'Data sertifikasi berhasil dihapus.');
+    }
+
+    /**
+     * Get details based on jenis_id.
+     */
+    public function getDetails(Request $request)
+    {
+        $details = DetailKegiatan::where('jenis_id', $request->jenis_id)
+            ->orderBy('nama')
+            ->get();
+
+        return response()->json($details);
+    }
+
+    /**
+     * Get nilai based on jenis, detail, and ruang lingkup.
+     */
+    public function getNilai(Request $request)
+    {
+        $nilai = NilaiKegiatan::where('jenis_id', $request->jenis_id)
+            ->where('detail_id', $request->detail_id)
+            ->where('ruang_id', $request->ruang_id)
+            ->first();
+
+        return response()->json([
+            'nilai' => $nilai ? $nilai->nilai : 0,
+        ]);
     }
 }

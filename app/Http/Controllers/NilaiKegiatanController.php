@@ -52,7 +52,7 @@ class NilaiKegiatanController extends Controller
 
         NilaiKegiatan::create($validated);
 
-        return redirect()->route('admin.nilai-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.nilai.index')
             ->with('success', 'Nilai kegiatan berhasil ditambahkan.');
     }
 
@@ -87,7 +87,7 @@ class NilaiKegiatanController extends Controller
 
         $nilaiKegiatan->update($validated);
 
-        return redirect()->route('admin.nilai-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.nilai.index')
             ->with('success', 'Nilai kegiatan berhasil diperbarui.');
     }
 
@@ -95,7 +95,7 @@ class NilaiKegiatanController extends Controller
     {
         $nilaiKegiatan->delete();
 
-        return redirect()->route('admin.nilai-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.nilai.index')
             ->with('success', 'Nilai kegiatan berhasil dihapus.');
     }
 

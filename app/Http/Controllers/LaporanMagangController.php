@@ -18,63 +18,69 @@ class LaporanMagangController extends Controller
     /**
      * Display list of laporan magang for mahasiswa.
      */
-    public function index()
+    public function index(Request $request)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $today = now()->format('Y-m-d');
+        $magangId = $request->get('magang_id');
+        
+        $query = LaporanMagang::with(['mahasiswaMagang', 'logKegiatans'])
+            ->where('mahasiswa_id', $mahasiswa->id);
 
-        // Check if mahasiswa has active magang (status aktif, tanggal_mulai <= today, tanggal_selesai is null OR >= today)
-        $magangAktif = MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
-            ->where('status', 'aktif')
-            ->where('tanggal_mulai', '<=', $today)
-            ->where(function($query) use ($today) {
-                $query->whereNull('tanggal_selesai')
-                      ->orWhere('tanggal_selesai', '>=', $today);
-            })
-            ->first();
-
-        if (!$magangAktif) {
-            return redirect()->route('mahasiswa.dashboard')
-                ->with('error', 'Anda tidak memiliki magang aktif. Silakan hubungi administrator.');
+        $selectedMagang = null;
+        if ($magangId) {
+            $selectedMagang = MahasiswaMagang::where('id', $magangId)
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->first();
+            
+            if ($selectedMagang) {
+                $query->where('mahasiswa_magang_id', $magangId);
+            }
         }
 
-        $laporans = LaporanMagang::with(['logKegiatans'])
-            ->where('mahasiswa_id', $mahasiswa->id)
-            ->where('mahasiswa_magang_id', $magangAktif->id)
-            ->latest()
-            ->paginate(10);
+        $laporans = $query->latest()->paginate(15);
 
-        return view('mahasiswa.laporan-magang.index', compact('laporans', 'magangAktif'));
+        return view('mahasiswa.laporan-magang.index', compact('laporans', 'selectedMagang'));
     }
 
     /**
      * Show form for creating new laporan magang.
      */
-    public function create()
+    public function create(Request $request)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $today = now()->format('Y-m-d');
-
-        // Check if mahasiswa has active magang (status aktif, tanggal_mulai <= today, tanggal_selesai is null OR >= today)
-        $magangAktif = MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
-            ->where('status', 'aktif')
-            ->where('tanggal_mulai', '<=', $today)
-            ->where(function($query) use ($today) {
-                $query->whereNull('tanggal_selesai')
-                      ->orWhere('tanggal_selesai', '>=', $today);
-            })
-            ->first();
-
+        $magangId = $request->get('magang_id');
+        
+        // Get specific magang or first active one
+        $magangAktif = null;
+        if ($magangId) {
+            $magangAktif = MahasiswaMagang::where('id', $magangId)
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->first();
+        }
+        
         if (!$magangAktif) {
-            return redirect()->route('mahasiswa.dashboard')
-                ->with('error', 'Anda tidak memiliki magang aktif.');
+            // Get first active magang
+            $today = now()->format('Y-m-d');
+            $magangAktif = MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
+                ->where('status', 'aktif')
+                ->where('tanggal_mulai', '<=', $today)
+                ->where(function($query) use ($today) {
+                    $query->whereNull('tanggal_selesai')
+                          ->orWhere('tanggal_selesai', '>=', $today);
+                })
+                ->first();
         }
 
-        // Get active tahun ajar
-        $tahunAjarAktif = TahunAjar::where('is_active', true)->first();
+        if (!$magangAktif) {
+            return redirect()->route('mahasiswa.magang.index')
+                ->with('error', 'Anda tidak memiliki magang aktif. Silakan tambah data magang terlebih dahulu.');
+        }
+
+        // Get tahun ajar from magang data
+        $tahunAjarAktif = $magangAktif->tahunAjar;
         if (!$tahunAjarAktif) {
-            return redirect()->route('mahasiswa.laporan-magang.index')
-                ->with('error', 'Tidak ada tahun ajar aktif.');
+            // Fallback to active tahun ajar if magang doesn't have one
+            $tahunAjarAktif = TahunAjar::where('is_active', true)->first();
         }
 
         return view('mahasiswa.laporan-magang.create', compact('magangAktif', 'tahunAjarAktif'));
@@ -86,31 +92,10 @@ class LaporanMagangController extends Controller
     public function store(Request $request)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        $today = now()->format('Y-m-d');
-
-        // Check if mahasiswa has active magang (status aktif, tanggal_mulai <= today, tanggal_selesai is null OR >= today)
-        $magangAktif = MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
-            ->where('status', 'aktif')
-            ->where('tanggal_mulai', '<=', $today)
-            ->where(function($query) use ($today) {
-                $query->whereNull('tanggal_selesai')
-                      ->orWhere('tanggal_selesai', '>=', $today);
-            })
-            ->first();
-
-        if (!$magangAktif) {
-            return redirect()->route('mahasiswa.dashboard')
-                ->with('error', 'Anda tidak memiliki magang aktif.');
-        }
-
-        // Get active tahun ajar
-        $tahunAjarAktif = TahunAjar::where('is_active', true)->first();
-        if (!$tahunAjarAktif) {
-            return redirect()->route('mahasiswa.laporan-magang.index')
-                ->with('error', 'Tidak ada tahun ajar aktif.');
-        }
-
+        
+        // Validate mahasiswa_magang_id
         $validated = $request->validate([
+            'mahasiswa_magang_id' => 'required|exists:mahasiswa_magangs,id',
             'judul_laporan' => 'required|string|max:255',
             'deskripsi' => 'required|string|max:2000',
             'tanggal_kegiatan' => 'required|date',
@@ -136,11 +121,36 @@ class LaporanMagangController extends Controller
             'bukti_kegiatan.*.*' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
+        // Verify that the magang belongs to this mahasiswa
+        $magang = MahasiswaMagang::where('id', $validated['mahasiswa_magang_id'])
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->first();
+
+        if (!$magang) {
+            return redirect()->route('mahasiswa.laporan-magang.index')
+                ->with('error', 'Magang tidak ditemukan.');
+        }
+
+        // Validate tanggal kegiatan is within magang period
+        $tanggalKegiatan = $validated['tanggal_kegiatan'];
+        if ($tanggalKegiatan < $magang->tanggal_mulai || $tanggalKegiatan > $magang->tanggal_selesai) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['tanggal_kegiatan' => 'Tanggal kegiatan harus berada dalam periode magang (' . $magang->tanggal_mulai->format('d M Y') . ' - ' . $magang->tanggal_selesai->format('d M Y') . ')']);
+        }
+
+        // Get tahun ajar from magang
+        $tahunAjarId = $magang->tahun_ajar_id;
+        if (!$tahunAjarId) {
+            return redirect()->route('mahasiswa.laporan-magang.index')
+                ->with('error', 'Tahun ajar tidak ditemukan pada data magang.');
+        }
+
         // Create laporan magang
         $laporan = LaporanMagang::create([
-            'mahasiswa_magang_id' => $magangAktif->id,
+            'mahasiswa_magang_id' => $validated['mahasiswa_magang_id'],
             'mahasiswa_id' => $mahasiswa->id,
-            'tahun_ajar_id' => $tahunAjarAktif->id,
+            'tahun_ajar_id' => $tahunAjarId,
             'judul_laporan' => $validated['judul_laporan'],
             'deskripsi' => $validated['deskripsi'],
             'tanggal_kegiatan' => $validated['tanggal_kegiatan'],

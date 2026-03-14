@@ -75,10 +75,6 @@
                     </h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-500">Level Kegiatan</span>
-                            <span class="font-medium text-gray-800">{{ $kompetisi->level_kegiatan }}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-gray-500">Kategori</span>
                             <span class="font-medium text-gray-800">{{ $kompetisi->kategori }}</span>
                         </div>
@@ -125,12 +121,8 @@
                             <span class="font-medium text-gray-800">{{ $kompetisi->nama_mahasiswa }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-500">NIDN/NUPTK</span>
-                            <span class="font-medium text-gray-800">{{ $kompetisi->nidn_nuptk ?? '-' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Nama Dosen</span>
-                            <span class="font-medium text-gray-800">{{ $kompetisi->nama_dosen ?? '-' }}</span>
+                            <span class="text-gray-500">Dosen Pembimbing</span>
+                            <span class="font-medium text-gray-800">{{ $kompetisi->dosen->nama ?? '-' }}</span>
                         </div>
                     </div>
                 </div>

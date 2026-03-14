@@ -26,7 +26,7 @@ class JenisKegiatanController extends Controller
 
         JenisKegiatan::create($validated);
 
-        return redirect()->route('admin.jenis-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.jenis.index')
             ->with('success', 'Jenis kegiatan berhasil ditambahkan.');
     }
 
@@ -43,7 +43,7 @@ class JenisKegiatanController extends Controller
 
         $jenisKegiatan->update($validated);
 
-        return redirect()->route('admin.jenis-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.jenis.index')
             ->with('success', 'Jenis kegiatan berhasil diperbarui.');
     }
 
@@ -51,7 +51,7 @@ class JenisKegiatanController extends Controller
     {
         $jenisKegiatan->delete();
 
-        return redirect()->route('admin.jenis-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.jenis.index')
             ->with('success', 'Jenis kegiatan berhasil dihapus.');
     }
 }

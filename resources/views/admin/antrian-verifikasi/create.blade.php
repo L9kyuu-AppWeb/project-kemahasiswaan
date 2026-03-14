@@ -1,41 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Antrian Verifikasi - Sistem Kemahasiswaan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('admin.antrian-verifikasi.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                        <i class="fas fa-arrow-left"></i>
-                        <span class="font-semibold">Kembali</span>
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right hidden md:block">
-                        <p class="font-medium">{{ auth()->guard('admin')->user()->name }}</p>
-                        <p class="text-xs text-blue-200">Administrator</p>
-                    </div>
-                    <form action="{{ route('admin.logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span class="hidden md:inline">Logout</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+@extends('layouts.app')
 
-    <div class="max-w-4xl mx-auto px-4 py-8">
+@section('title', 'Tambah Antrian Verifikasi')
+
+@section('content')
+<div class="max-w-4xl mx-auto px-4 py-8">
         <!-- Header Section -->
         <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl shadow-lg p-6 mb-6 text-white">
             <h2 class="text-2xl font-bold">
@@ -193,5 +161,4 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+@endsection

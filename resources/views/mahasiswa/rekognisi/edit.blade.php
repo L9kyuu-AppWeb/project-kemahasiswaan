@@ -82,12 +82,59 @@
                         </div>
                     </div>
 
+                    <!-- Data Kegiatan -->
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-clipboard-list text-cyan-600 mr-2"></i>Data Kegiatan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Jenis Kegiatan</label>
+                                <select name="jenis_kegiatan_id" id="jenis_kegiatan_id" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500" onchange="loadDetails()">
+                                    <option value="">Pilih Jenis</option>
+                                    @foreach($jenisKegiatans as $jenis)<option value="{{ $jenis->id }}" {{ old('jenis_kegiatan_id', $rekognisi->jenis_kegiatan_id) == $jenis->id ? 'selected' : '' }}>{{ $jenis->nama }}</option>@endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Detail Kegiatan</label>
+                                <select name="detail_kegiatan_id" id="detail_kegiatan_id" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500" onchange="loadNilai()">
+                                    <option value="">Pilih Detail</option>
+                                    @if($rekognisi->detailKegiatan)<option value="{{ $rekognisi->detail_kegiatan_id }}" selected>{{ $rekognisi->detailKegiatan->nama }}</option>@endif
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Ruang Lingkup</label>
+                                <select name="ruang_lingkup_id" id="ruang_lingkup_id" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500" onchange="loadNilai()">
+                                    <option value="">Pilih Ruang Lingkup</option>
+                                    <option value="1" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 1 ? 'selected' : '' }}>Lokal</option>
+                                    <option value="2" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 2 ? 'selected' : '' }}>Kota</option>
+                                    <option value="3" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 3 ? 'selected' : '' }}>Provinsi</option>
+                                    <option value="4" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 4 ? 'selected' : '' }}>Wilayah</option>
+                                    <option value="5" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 5 ? 'selected' : '' }}>Nasional</option>
+                                    <option value="6" {{ old('ruang_lingkup_id', $rekognisi->ruang_lingkup_id) == 6 ? 'selected' : '' }}>Internasional</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Nilai/Point</label>
+                                <input type="number" name="nilai" id="nilai" value="{{ old('nilai', $rekognisi->nilai ?? 0) }}" readonly class="w-full px-4 py-3 border rounded-lg bg-gray-100 font-bold text-indigo-600">
+                                <p class="text-xs text-gray-500 mt-1">Otomatis terisi saat memilih detail & ruang lingkup</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-users text-cyan-600 mr-2"></i>Data Peserta</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div><label class="block text-gray-700 font-semibold mb-2">NIM</label><input type="text" value="{{ $rekognisi->nim }}" disabled class="w-full px-4 py-3 border rounded-lg bg-gray-100"></div>
-                            <div><label class="block text-gray-700 font-semibold mb-2">NIDN/NUPTK</label><input type="text" name="nidn_nuptk" value="{{ old('nidn_nuptk', $rekognisi->nidn_nuptk) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500"></div>
-                            <div><label class="block text-gray-700 font-semibold mb-2">Nama Dosen</label><input type="text" name="nama_dosen" value="{{ old('nama_dosen', $rekognisi->nama_dosen) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500"></div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Dosen Pembimbing</label>
+                                <select name="dosen_id" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cyan-500">
+                                    <option value="">-- Pilih Dosen (Opsional) --</option>
+                                    @foreach($dosens as $dosen)
+                                    <option value="{{ $dosen->id }}" {{ old('dosen_id', $rekognisi->dosen_id) == $dosen->id ? 'selected' : '' }}>
+                                        {{ $dosen->nama }} ({{ $dosen->nuptk }})
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -103,11 +150,54 @@
                 </div>
 
                 <div class="flex gap-3 pt-6 mt-6 border-t">
-                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold">Update</button>
-                    <a href="{{ route('mahasiswa.rekognisi.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold text-center">Batal</a>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-lg font-semibold"><i class="fas fa-save mr-2"></i>Update</button>
+                    <a href="{{ route('mahasiswa.rekognisi.index') }}" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold text-center"><i class="fas fa-times mr-2"></i>Batal</a>
                 </div>
             </form>
         </div>
     </div>
+
+    <script>
+    function loadDetails() {
+        const jenisId = document.getElementById('jenis_kegiatan_id').value;
+        const detailSelect = document.getElementById('detail_kegiatan_id');
+        const ruangLingkupSelect = document.getElementById('ruang_lingkup_id');
+        const nilaiInput = document.getElementById('nilai');
+        
+        // Reset detail, ruang lingkup, and nilai when jenis kegiatan changes
+        detailSelect.innerHTML = '<option value="">Pilih Detail</option>';
+        ruangLingkupSelect.value = '';
+        nilaiInput.value = 0;
+
+        if (jenisId) {
+            fetch('/api/rekognisi/detail-kegiatan?jenis_id=' + jenisId)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(d => {
+                        detailSelect.innerHTML += '<option value="' + d.id + '">' + d.nama + '</option>';
+                    });
+                })
+                .catch(err => console.error('Error loading details:', err));
+        }
+    }
+
+    function loadNilai() {
+        const jenisId = document.getElementById('jenis_kegiatan_id').value;
+        const detailId = document.getElementById('detail_kegiatan_id').value;
+        const ruangId = document.getElementById('ruang_lingkup_id').value;
+        const nilaiInput = document.getElementById('nilai');
+
+        if (jenisId && detailId && ruangId) {
+            fetch('/api/rekognisi/nilai?jenis_id=' + jenisId + '&detail_id=' + detailId + '&ruang_id=' + ruangId)
+                .then(r => r.json())
+                .then(data => {
+                    nilaiInput.value = data.nilai || 0;
+                })
+                .catch(err => console.error('Error loading nilai:', err));
+        } else {
+            nilaiInput.value = 0;
+        }
+    }
+    </script>
 </body>
 </html>

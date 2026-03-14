@@ -125,12 +125,8 @@
                             <span class="font-medium text-gray-800">{{ $kompetisi->nama_mahasiswa }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-500">NIDN/NUPTK</span>
-                            <span class="font-medium text-gray-800">{{ $kompetisi->nidn_nuptk ?? '-' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Nama Dosen</span>
-                            <span class="font-medium text-gray-800">{{ $kompetisi->nama_dosen ?? '-' }}</span>
+                            <span class="text-gray-500">Dosen Pembimbing</span>
+                            <span class="font-medium text-gray-800">{{ $kompetisi->dosen->nama ?? '-' }}</span>
                         </div>
                     </div>
                 </div>

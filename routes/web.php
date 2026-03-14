@@ -4,9 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AntrianVerifikasiController;
 use App\Http\Controllers\BeasiswaController;
 use App\Http\Controllers\DetailKegiatanController;
+use App\Http\Controllers\DosenController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JenisKegiatanController;
 use App\Http\Controllers\JenisRekognisiController;
+use App\Http\Controllers\KategoriKegiatanUmumController;
+use App\Http\Controllers\KegiatanUmumController;
 use App\Http\Controllers\KompetisiMahasiswaDosenController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LaporanMagangController;
@@ -120,6 +123,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{sertifikasi}/approve', [SertifikasiController::class, 'adminApprove'])->name('approve');
         });
 
+        // Dosen Management
+        Route::prefix('dosen')->name('dosen.')->group(function () {
+            Route::get('/', [DosenController::class, 'index'])->name('index');
+            Route::get('/create', [DosenController::class, 'create'])->name('create');
+            Route::post('/', [DosenController::class, 'store'])->name('store');
+            Route::get('/{dosen}', [DosenController::class, 'show'])->name('show');
+            Route::get('/{dosen}/edit', [DosenController::class, 'edit'])->name('edit');
+            Route::put('/{dosen}', [DosenController::class, 'update'])->name('update');
+            Route::delete('/{dosen}', [DosenController::class, 'destroy'])->name('destroy');
+        });
+
         // Master Data Kegiatan Management
         Route::prefix('master-kegiatan')->name('master-kegiatan.')->group(function () {
             // Jenis Kegiatan
@@ -208,6 +222,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{tahunAjar}', [TahunAjarController::class, 'destroy'])->name('destroy');
         });
 
+        // Kategori Kegiatan Umum Management (Admin)
+        Route::prefix('kategori-kegiatan-umum')->name('kategori-kegiatan-umum.')->group(function () {
+            Route::get('/', [KategoriKegiatanUmumController::class, 'index'])->name('index');
+            Route::get('/create', [KategoriKegiatanUmumController::class, 'create'])->name('create');
+            Route::post('/', [KategoriKegiatanUmumController::class, 'store'])->name('store');
+            Route::get('/{kategoriKegiatanUmum}', [KategoriKegiatanUmumController::class, 'show'])->name('show');
+            Route::get('/{kategoriKegiatanUmum}/edit', [KategoriKegiatanUmumController::class, 'edit'])->name('edit');
+            Route::put('/{kategoriKegiatanUmum}', [KategoriKegiatanUmumController::class, 'update'])->name('update');
+            Route::delete('/{kategoriKegiatanUmum}', [KategoriKegiatanUmumController::class, 'destroy'])->name('destroy');
+        });
+
+        // Kegiatan Umum Management (Admin)
+        Route::prefix('kegiatan-umum')->name('kegiatan-umum.')->group(function () {
+            Route::get('/', [KegiatanUmumController::class, 'adminIndex'])->name('index');
+            Route::get('/{kegiatanUmum}', [KegiatanUmumController::class, 'adminShow'])->name('show');
+            Route::post('/{kegiatanUmum}/approve', [KegiatanUmumController::class, 'adminApprove'])->name('approve');
+            Route::delete('/{kegiatanUmum}', [KegiatanUmumController::class, 'adminDestroy'])->name('destroy');
+        });
+
         // Mahasiswa Magang Management (Admin)
         Route::prefix('magang')->name('magang.')->group(function () {
             Route::get('/', [MahasiswaMagangController::class, 'index'])->name('index');
@@ -282,6 +315,14 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
             Route::delete('/{laporan}', [LaporanMagangController::class, 'destroy'])->name('destroy');
         });
 
+        // Magang Routes for Mahasiswa
+        Route::prefix('magang')->name('magang.')->group(function () {
+            Route::get('/', [MahasiswaMagangController::class, 'mahasiswaIndex'])->name('index');
+            Route::get('/create', [MahasiswaMagangController::class, 'mahasiswaCreate'])->name('create');
+            Route::post('/', [MahasiswaMagangController::class, 'mahasiswaStore'])->name('store');
+            Route::get('/{magang}', [MahasiswaMagangController::class, 'mahasiswaShow'])->name('show');
+        });
+
         // Antrian Verifikasi Routes for Mahasiswa
         Route::prefix('antrian-verifikasi')->name('antrian-verifikasi.')->group(function () {
             Route::get('/', [MahasiswaAntrianVerifikasiController::class, 'index'])->name('index');
@@ -306,12 +347,27 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
         // Rekognisi Routes for Mahasiswa
         Route::prefix('rekognisi')->name('rekognisi.')->group(function () {
             Route::get('/', [RekognisiController::class, 'index'])->name('index');
+            Route::get('/panduan', [RekognisiController::class, 'panduan'])->name('panduan');
             Route::get('/create', [RekognisiController::class, 'create'])->name('create');
             Route::post('/', [RekognisiController::class, 'store'])->name('store');
             Route::get('/{rekognisi}', [RekognisiController::class, 'show'])->name('show');
             Route::get('/{rekognisi}/edit', [RekognisiController::class, 'edit'])->name('edit');
             Route::put('/{rekognisi}', [RekognisiController::class, 'update'])->name('update');
             Route::delete('/{rekognisi}', [RekognisiController::class, 'destroy'])->name('destroy');
+        });
+
+        // Kegiatan Umum Routes for Mahasiswa
+        Route::prefix('kegiatan-umum')->name('kegiatan-umum.')->group(function () {
+            Route::get('/', [KegiatanUmumController::class, 'index'])->name('index');
+            Route::get('/create', [KegiatanUmumController::class, 'create'])->name('create');
+            Route::post('/', [KegiatanUmumController::class, 'store'])->name('store');
+            Route::get('/{kegiatanUmum}', [KegiatanUmumController::class, 'show'])->name('show');
+            Route::get('/{kegiatanUmum}/edit', [KegiatanUmumController::class, 'edit'])->name('edit');
+            Route::put('/{kegiatanUmum}', [KegiatanUmumController::class, 'update'])->name('update');
+            Route::delete('/{kegiatanUmum}', [KegiatanUmumController::class, 'destroy'])->name('destroy');
+            // AJAX routes
+            Route::get('/api/detail-kegiatan', [KegiatanUmumController::class, 'getDetails'])->name('api.detail-kegiatan');
+            Route::get('/api/nilai', [KegiatanUmumController::class, 'getNilai'])->name('api.nilai');
         });
 
         // Sertifikasi Routes for Mahasiswa
@@ -325,4 +381,18 @@ Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
             Route::delete('/{sertifikasi}', [SertifikasiController::class, 'destroy'])->name('destroy');
         });
     });
+});
+
+// API for kompetisi (accessible by authenticated admin or mahasiswa)
+Route::middleware(['auth:admin,mahasiswa'])->group(function () {
+    Route::get('/api/kompetisi/nilai', [KompetisiMahasiswaDosenController::class, 'getNilai']);
+    Route::get('/api/kompetisi/detail-kegiatan', [KompetisiMahasiswaDosenController::class, 'getDetails']);
+
+    // API for rekognisi
+    Route::get('/api/rekognisi/nilai', [RekognisiController::class, 'getNilai']);
+    Route::get('/api/rekognisi/detail-kegiatan', [RekognisiController::class, 'getDetails']);
+
+    // API for sertifikasi
+    Route::get('/api/sertifikasi/nilai', [SertifikasiController::class, 'getNilai']);
+    Route::get('/api/sertifikasi/detail-kegiatan', [SertifikasiController::class, 'getDetails']);
 });

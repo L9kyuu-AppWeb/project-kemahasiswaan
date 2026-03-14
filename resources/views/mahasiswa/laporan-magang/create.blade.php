@@ -74,6 +74,31 @@
         <form action="{{ route('mahasiswa.laporan-magang.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-md p-8">
             @csrf
 
+            <!-- Magang Info (Read-only) -->
+            <div class="mb-8">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-briefcase text-orange-600"></i>
+                    Magang
+                </h3>
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <p class="text-orange-500">Perusahaan</p>
+                            <p class="font-medium text-gray-800">{{ $magangAktif->nama_perusahaan }}</p>
+                        </div>
+                        <div>
+                            <p class="text-orange-500">Lokasi</p>
+                            <p class="font-medium text-gray-800">{{ $magangAktif->lokasi_perusahaan }}</p>
+                        </div>
+                        <div>
+                            <p class="text-orange-500">Periode</p>
+                            <p class="font-medium text-gray-800">{{ $magangAktif->tanggal_mulai->format('d M Y') }} - {{ $magangAktif->tanggal_selesai->format('d M Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="mahasiswa_magang_id" value="{{ $magangAktif->id }}">
+            </div>
+
             <!-- Informasi Laporan -->
             <div class="mb-8">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -102,9 +127,10 @@
                         <label for="tahun_ajar_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Tahun Ajar
                         </label>
-                        <input type="text" id="tahun_ajar_id" value="{{ $tahunAjarAktif->nama }} ({{ ucfirst($tahunAjarAktif->semester) }})" readonly
+                        <input type="text" id="tahun_ajar_id_display" value="{{ $tahunAjarAktif->nama }} ({{ ucfirst($tahunAjarAktif->semester) }})" readonly
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed">
-                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle"></i> Tahun ajar aktif dipilih otomatis</p>
+                        <input type="hidden" name="tahun_ajar_id" value="{{ $tahunAjarAktif->id }}">
+                        <p class="text-xs text-gray-500 mt-1"><i class="fas fa-info-circle"></i> Tahun ajar diambil dari data magang</p>
                     </div>
 
                     <div>
@@ -112,7 +138,11 @@
                             Tanggal Kegiatan <span class="text-red-500">*</span>
                         </label>
                         <input type="date" id="tanggal_kegiatan" name="tanggal_kegiatan" value="{{ old('tanggal_kegiatan') }}" required
+                               min="{{ $magangAktif->tanggal_mulai->format('Y-m-d') }}" max="{{ $magangAktif->tanggal_selesai->format('Y-m-d') }}"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle"></i> Tanggal harus antara {{ $magangAktif->tanggal_mulai->format('d M Y') }} - {{ $magangAktif->tanggal_selesai->format('d M Y') }}
+                        </p>
                     </div>
 
                     <div>
@@ -308,6 +338,22 @@
 
         // Add first log on page load
         addLog();
+
+        // Auto-fill tanggal kegiatan with today's date if within magang period
+        document.addEventListener('DOMContentLoaded', function() {
+            const tanggalInput = document.getElementById('tanggal_kegiatan');
+            const minDate = "{{ $magangAktif->tanggal_mulai->format('Y-m-d') }}";
+            const maxDate = "{{ $magangAktif->tanggal_selesai->format('Y-m-d') }}";
+            const today = new Date().toISOString().split('T')[0];
+
+            // Check if today is within magang period
+            if (today >= minDate && today <= maxDate) {
+                tanggalInput.value = today;
+            } else {
+                // Use start date of magang
+                tanggalInput.value = minDate;
+            }
+        });
     </script>
 
     <!-- Footer -->

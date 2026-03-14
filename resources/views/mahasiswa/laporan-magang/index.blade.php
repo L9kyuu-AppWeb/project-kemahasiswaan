@@ -13,9 +13,9 @@
         <div class="max-w-7xl mx-auto px-4 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <a href="{{ route('mahasiswa.dashboard') }}" class="flex items-center gap-2 hover:opacity-80 transition">
+                    <a href="{{ route('mahasiswa.magang.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
                         <i class="fas fa-arrow-left"></i>
-                        <span class="font-semibold">Dashboard</span>
+                        <span class="font-semibold">Kembali ke Magang</span>
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -46,7 +46,7 @@
                     </h2>
                     <p class="text-orange-100 text-sm">Kelola laporan kegiatan magang Anda</p>
                 </div>
-                <a href="{{ route('mahasiswa.laporan-magang.create') }}"
+                <a href="{{ route('mahasiswa.laporan-magang.create', ['magang_id' => $selectedMagang ? $selectedMagang->id : '']) }}"
                    class="bg-white text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-lg transition duration-200 font-semibold flex items-center gap-2 shadow-lg">
                     <i class="fas fa-plus-circle"></i>
                     Buat Laporan Baru
@@ -69,34 +69,32 @@
         @endif
 
         <!-- Info Card -->
+        @if($selectedMagang)
         <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-6">
             <div class="flex items-start gap-4">
                 <div class="text-orange-600 text-2xl">
                     <i class="fas fa-info-circle"></i>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-orange-800 mb-2">Informasi Magang Aktif</h4>
+                    <h4 class="font-semibold text-orange-800 mb-2">Informasi Magang</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-orange-700">
                         <div>
                             <p class="text-orange-500">Perusahaan</p>
-                            <p class="font-medium">{{ $magangAktif->nama_perusahaan }}</p>
+                            <p class="font-medium">{{ $selectedMagang->nama_perusahaan }}</p>
                         </div>
                         <div>
                             <p class="text-orange-500">Lokasi</p>
-                            <p class="font-medium">{{ $magangAktif->lokasi_perusahaan }}</p>
+                            <p class="font-medium">{{ $selectedMagang->lokasi_perusahaan }}</p>
                         </div>
                         <div>
                             <p class="text-orange-500">Periode</p>
-                            <p class="font-medium">{{ $magangAktif->tanggal_mulai->format('d M Y') }} - {{ $magangAktif->tanggal_selesai->format('d M Y') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-orange-500">Dosen Pembimbing</p>
-                            <p class="font-medium">{{ $magangAktif->dosen_pembimbing_nama ?? '-' }} {{ $magangAktif->dosen_pembimbing_nik ? '(' . $magangAktif->dosen_pembimbing_nik . ')' : '' }}</p>
+                            <p class="font-medium">{{ $selectedMagang->tanggal_mulai->format('d M Y') }} - {{ $selectedMagang->tanggal_selesai->format('d M Y') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- Laporan List -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden">

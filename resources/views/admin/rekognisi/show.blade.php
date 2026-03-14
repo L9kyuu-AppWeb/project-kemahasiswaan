@@ -75,10 +75,6 @@
                     </h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
-                            <span class="text-gray-500">Level</span>
-                            <span class="font-medium text-gray-800">{{ $rekognisi->level }}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-gray-500">Jenis Rekognisi</span>
                             <span class="font-medium text-gray-800">{{ $rekognisi->jenisRekognisi->nama ?? '-' }}</span>
                         </div>
@@ -109,12 +105,8 @@
                             <span class="font-medium text-gray-800">{{ $rekognisi->nama_mahasiswa }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-500">NIDN/NUPTK</span>
-                            <span class="font-medium text-gray-800">{{ $rekognisi->nidn_nuptk ?? '-' }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Nama Dosen</span>
-                            <span class="font-medium text-gray-800">{{ $rekognisi->nama_dosen ?? '-' }}</span>
+                            <span class="text-gray-500">Dosen Pembimbing</span>
+                            <span class="font-medium text-gray-800">{{ $rekognisi->dosen->nama ?? '-' }}</span>
                         </div>
                     </div>
                 </div>

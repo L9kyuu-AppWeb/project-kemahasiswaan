@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\MahasiswaMagang;
 use App\Models\Mahasiswa;
 use App\Models\TahunAjar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MahasiswaMagangController extends Controller
 {
@@ -152,5 +154,86 @@ class MahasiswaMagangController extends Controller
 
         return redirect()->route('admin.magang.index')
             ->with('success', 'Data mahasiswa magang berhasil dihapus.');
+    }
+
+    // ==================== MAHASISWA METHODS ====================
+
+    /**
+     * Display magang for mahasiswa.
+     */
+    public function mahasiswaIndex()
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        $magangs = MahasiswaMagang::where('mahasiswa_id', $mahasiswa->id)
+            ->with('tahunAjar')
+            ->latest()
+            ->get();
+
+        return view('mahasiswa.magang.index', compact('magangs'));
+    }
+
+    /**
+     * Show form to create magang for mahasiswa.
+     */
+    public function mahasiswaCreate()
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
+
+        return view('mahasiswa.magang.create', compact('mahasiswa', 'tahunAjarList'));
+    }
+
+    /**
+     * Store magang for mahasiswa.
+     */
+    public function mahasiswaStore(Request $request)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+
+        $validated = $request->validate([
+            'tahun_ajar_id' => 'required|exists:tahun_ajars,id',
+            'semester' => 'required|integer|min:1|max:14',
+            'nama_perusahaan' => 'required|string|max:255',
+            'lokasi_perusahaan' => 'required|string|max:255',
+            'pembimbing_lapangan' => 'nullable|string|max:255',
+            'no_telp_pembimbing' => 'nullable|string|max:20',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+
+        MahasiswaMagang::create([
+            'mahasiswa_id' => $mahasiswa->id,
+            'tahun_ajar_id' => $validated['tahun_ajar_id'],
+            'semester' => $validated['semester'],
+            'nama_perusahaan' => $validated['nama_perusahaan'],
+            'lokasi_perusahaan' => $validated['lokasi_perusahaan'],
+            'pembimbing_lapangan' => $validated['pembimbing_lapangan'],
+            'no_telp_pembimbing' => $validated['no_telp_pembimbing'],
+            'tanggal_mulai' => $validated['tanggal_mulai'],
+            'tanggal_selesai' => $validated['tanggal_selesai'],
+            'status' => 'aktif',
+            'catatan' => $validated['catatan'],
+        ]);
+
+        return redirect()->route('mahasiswa.magang.index')
+            ->with('success', 'Data magang berhasil ditambahkan.');
+    }
+
+    /**
+     * Display detail magang for mahasiswa.
+     */
+    public function mahasiswaShow(MahasiswaMagang $magang)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+
+        if ($magang->mahasiswa_id !== $mahasiswa->id) {
+            abort(403);
+        }
+
+        // Load relationships
+        $magang->load(['tahunAjar', 'laporanMagangs']);
+
+        return view('mahasiswa.magang.show', compact('magang'));
     }
 }

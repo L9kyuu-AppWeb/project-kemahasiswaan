@@ -34,7 +34,6 @@
                 <div class="bg-gray-50 rounded-xl p-4">
                     <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-info-circle text-indigo-600"></i>Informasi Sertifikasi</h3>
                     <div class="space-y-2 text-sm">
-                        <div class="flex justify-between"><span class="text-gray-500">Level</span><span class="font-medium">{{ $sertifikasi->level }}</span></div>
                         <div class="flex justify-between"><span class="text-gray-500">Penyelenggara</span><span class="font-medium">{{ $sertifikasi->nama_penyelenggara }}</span></div>
                         <div class="flex justify-between"><span class="text-gray-500">Tanggal Sertifikat</span><span class="font-medium">{{ $sertifikasi->tanggal_sertifikat?->format('d M Y') ?? '-' }}</span></div>
                     </div>
@@ -44,8 +43,7 @@
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between"><span class="text-gray-500">NIM</span><span class="font-medium">{{ $sertifikasi->nim }}</span></div>
                         <div class="flex justify-between"><span class="text-gray-500">Nama Mahasiswa</span><span class="font-medium">{{ $sertifikasi->nama_mahasiswa }}</span></div>
-                        <div class="flex justify-between"><span class="text-gray-500">NIDN/NUPTK</span><span class="font-medium">{{ $sertifikasi->nidn_nuptk ?? '-' }}</span></div>
-                        <div class="flex justify-between"><span class="text-gray-500">Nama Dosen</span><span class="font-medium">{{ $sertifikasi->nama_dosen ?? '-' }}</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Dosen Pembimbing</span><span class="font-medium">{{ $sertifikasi->dosen->nama ?? '-' }}</span></div>
                     </div>
                 </div>
             </div>

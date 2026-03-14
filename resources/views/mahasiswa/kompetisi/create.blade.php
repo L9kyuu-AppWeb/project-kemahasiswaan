@@ -1,40 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Kompetisi - Sistem Kemahasiswaan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-gray-50">
-    <!-- Navbar -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('mahasiswa.kompetisi.index') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                        <i class="fas fa-arrow-left"></i>
-                        <span class="font-semibold">Kembali</span>
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right hidden md:block">
-                        <p class="font-medium">{{ auth()->guard('mahasiswa')->user()->name }}</p>
-                        <p class="text-xs text-blue-200">{{ auth()->guard('mahasiswa')->user()->nim }}</p>
-                    </div>
-                    <form action="{{ route('mahasiswa.logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span class="hidden md:inline">Logout</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
+@extends('mahasiswa.layouts.app')
 
+@section('title', 'Tambah Kompetisi')
+
+@section('content')
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="bg-white rounded-xl shadow-lg p-6">
             <div class="flex items-center gap-4 mb-6">
@@ -73,20 +41,6 @@
                             <i class="fas fa-trophy text-emerald-600 mr-2"></i>Informasi Kompetisi
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Level Kegiatan <span class="text-red-500">*</span></label>
-                                <select name="level_kegiatan" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
-                                    <option value="">Pilih Level</option>
-                                    <option value="Kabupaten/Kota">Kabupaten/Kota</option>
-                                    <option value="Provinsi/wilayah">Provinsi/wilayah</option>
-                                    <option value="Nasional">Nasional</option>
-                                    <option value="Internasional">Internasional</option>
-                                </select>
-                                @error('level_kegiatan')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Kategori <span class="text-red-500">*</span></label>
                                 <select name="kategori" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
@@ -137,7 +91,60 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                        </div>
+                    </div>
 
+                    <!-- Kegiatan Fields -->
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">
+                            <i class="fas fa-clipboard-list text-emerald-600 mr-2"></i>Data Kegiatan
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Jenis Kegiatan</label>
+                                <select name="jenis_kegiatan_id" id="jenis_kegiatan_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="loadDetails()">
+                                    <option value="">Pilih Jenis</option>
+                                    @foreach($jenisKegiatans as $jenis)
+                                    <option value="{{ $jenis->id }}">{{ $jenis->nama }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Detail Kegiatan</label>
+                                <select name="detail_kegiatan_id" id="detail_kegiatan_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="loadNilai()">
+                                    <option value="">Pilih Detail</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Ruang Lingkup</label>
+                                <select name="ruang_lingkup_id" id="ruang_lingkup_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" onchange="loadNilai()">
+                                    <option value="">Pilih Ruang Lingkup</option>
+                                    <option value="1">Lokal</option>
+                                    <option value="2">Kota</option>
+                                    <option value="3">Provinsi</option>
+                                    <option value="4">Wilayah</option>
+                                    <option value="5">Nasional</option>
+                                    <option value="6">Internasional</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Nilai/Point</label>
+                                <input type="number" name="nilai" id="nilai" value="{{ old('nilai', 0) }}" readonly
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 font-bold text-indigo-600">
+                                <p class="text-xs text-gray-500 mt-1">Otomatis terisi saat memilih detail & ruang lingkup</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Kompetisi -->
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">
+                            <i class="fas fa-info-circle text-emerald-600 mr-2"></i>Detail Kompetisi
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-gray-700 font-semibold mb-2">Penyelenggara <span class="text-red-500">*</span></label>
                                 <input type="text" name="penyelenggara" value="{{ old('penyelenggara') }}"
@@ -191,45 +198,64 @@
                         </div>
                     </div>
 
-                    <!-- Data Mahasiswa & Dosen -->
+                    <!-- Data Peserta -->
                     <div>
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">
                             <i class="fas fa-users text-emerald-600 mr-2"></i>Data Peserta
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">NIM</label>
-                                <input type="text" value="{{ $mahasiswa->nim }}" disabled
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100">
+                        
+                        <!-- Mahasiswa (Automatis) -->
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-4">
+                            <h4 class="font-semibold text-emerald-800 mb-3">
+                                <i class="fas fa-user-graduate mr-2"></i>Data Mahasiswa (Otomatis)
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-emerald-700 font-semibold mb-2">NIM</label>
+                                    <input type="text" value="{{ $mahasiswa->nim }}" disabled
+                                           class="w-full px-4 py-3 border border-emerald-300 rounded-lg bg-white font-medium text-gray-700">
+                                </div>
+                                <div>
+                                    <label class="block text-emerald-700 font-semibold mb-2">Nama</label>
+                                    <input type="text" value="{{ $mahasiswa->name }}" disabled
+                                           class="w-full px-4 py-3 border border-emerald-300 rounded-lg bg-white font-medium text-gray-700">
+                                </div>
                             </div>
+                            <input type="hidden" name="mahasiswa_id" value="{{ $mahasiswa->id }}">
+                        </div>
 
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">NIDN/NUPTK</label>
-                                <input type="text" name="nidn_nuptk" value="{{ old('nidn_nuptk') }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                @error('nidn_nuptk')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                        <!-- Dosen (Pilihan) -->
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-chalkboard-teacher mr-2"></i>Data Dosen Pembimbing
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-gray-700 font-semibold mb-2">Pilih Dosen</label>
+                                    <select name="dosen_id" id="dosen_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <option value="">-- Pilih Dosen Pembimbing (Opsional) --</option>
+                                        @foreach($dosens as $dosen)
+                                        <option value="{{ $dosen->id }}" {{ old('dosen_id') == $dosen->id ? 'selected' : '' }}>
+                                            {{ $dosen->nama }} ({{ $dosen->nuptk }})
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @error('dosen_id')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
+                        </div>
 
-                            <div>
-                                <label class="block text-gray-700 font-semibold mb-2">Nama Dosen</label>
-                                <input type="text" name="nama_dosen" value="{{ old('nama_dosen') }}"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                @error('nama_dosen')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label class="block text-gray-700 font-semibold mb-2">Surat Tugas (PDF)</label>
-                                <input type="file" name="url_surat_tugas" accept=".pdf"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <p class="text-xs text-gray-500 mt-1">Maksimal 5MB</p>
-                                @error('url_surat_tugas')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                        <!-- Surat Tugas -->
+                        <div class="mt-4">
+                            <label class="block text-gray-700 font-semibold mb-2">Surat Tugas (PDF)</label>
+                            <input type="file" name="url_surat_tugas" accept=".pdf"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <p class="text-xs text-gray-500 mt-1">Maksimal 5MB</p>
+                            @error('url_surat_tugas')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
@@ -292,5 +318,47 @@
             </form>
         </div>
     </div>
-</body>
-</html>
+
+    <script>
+    function loadDetails() {
+        const jenisId = document.getElementById('jenis_kegiatan_id').value;
+        const detailSelect = document.getElementById('detail_kegiatan_id');
+        const ruangLingkupSelect = document.getElementById('ruang_lingkup_id');
+        const nilaiInput = document.getElementById('nilai');
+
+        // Reset detail, ruang lingkup, and nilai when jenis kegiatan changes
+        detailSelect.innerHTML = '<option value="">Pilih Detail</option>';
+        ruangLingkupSelect.value = '';
+        nilaiInput.value = 0;
+
+        if (jenisId) {
+            fetch('/api/kompetisi/detail-kegiatan?jenis_id=' + jenisId)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(d => {
+                        detailSelect.innerHTML += '<option value="' + d.id + '">' + d.nama + '</option>';
+                    });
+                })
+                .catch(err => console.error('Error loading details:', err));
+        }
+    }
+
+    function loadNilai() {
+        const jenisId = document.getElementById('jenis_kegiatan_id').value;
+        const detailId = document.getElementById('detail_kegiatan_id').value;
+        const ruangId = document.getElementById('ruang_lingkup_id').value;
+        const nilaiInput = document.getElementById('nilai');
+
+        if (jenisId && detailId && ruangId) {
+            fetch('/api/kompetisi/nilai?jenis_id=' + jenisId + '&detail_id=' + detailId + '&ruang_id=' + ruangId)
+                .then(r => r.json())
+                .then(data => {
+                    nilaiInput.value = data.nilai || 0;
+                })
+                .catch(err => console.error('Error loading nilai:', err));
+        } else {
+            nilaiInput.value = 0;
+        }
+    }
+    </script>
+@endsection

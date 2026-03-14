@@ -29,7 +29,7 @@ class DetailKegiatanController extends Controller
 
         DetailKegiatan::create($validated);
 
-        return redirect()->route('admin.detail-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.detail.index')
             ->with('success', 'Detail kegiatan berhasil ditambahkan.');
     }
 
@@ -48,7 +48,7 @@ class DetailKegiatanController extends Controller
 
         $detailKegiatan->update($validated);
 
-        return redirect()->route('admin.detail-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.detail.index')
             ->with('success', 'Detail kegiatan berhasil diperbarui.');
     }
 
@@ -56,7 +56,7 @@ class DetailKegiatanController extends Controller
     {
         $detailKegiatan->delete();
 
-        return redirect()->route('admin.detail-kegiatan.index')
+        return redirect()->route('admin.master-kegiatan.detail.index')
             ->with('success', 'Detail kegiatan berhasil dihapus.');
     }
 }

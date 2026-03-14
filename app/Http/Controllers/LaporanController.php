@@ -253,8 +253,9 @@ class LaporanController extends Controller
         }
 
         $tahunAjarList = TahunAjar::orderBy('tahun_mulai', 'desc')->get();
+        $beasiswaTipe = $beasiswaAktif->beasiswaTipe;
 
-        return view('mahasiswa.laporan.create', compact('tahunAjarList', 'beasiswaTipe', 'tahunAjarAktif'));
+        return view('mahasiswa.laporan.create', compact('tahunAjarList', 'beasiswaTipe', 'tahunAjarAktif', 'beasiswaAktif'));
     }
 
     /**

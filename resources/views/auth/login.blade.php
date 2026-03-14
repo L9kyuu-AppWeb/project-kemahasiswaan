@@ -62,13 +62,42 @@
             </div>
 
             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p class="text-sm font-medium text-gray-700 mb-2">Akun Demo:</p>
-                <div class="text-xs text-gray-600 space-y-1">
-                    <p><strong>Admin:</strong> admin@example.com / password123</p>
-                    <p><strong>Mahasiswa:</strong> ahmad.rizki@example.com / password123</p>
+                <p class="text-sm font-medium text-gray-700 mb-3">Akun Demo (Klik untuk login):</p>
+                <div class="space-y-2">
+                    <button type="button" onclick="fillLogin('admin@example.com', 'password123')"
+                            class="w-full text-left px-3 py-2 bg-white border border-gray-200 rounded hover:bg-blue-50 hover:border-blue-300 transition text-xs">
+                        <span class="font-semibold text-blue-600">Admin:</span>
+                        <span class="ml-2 text-gray-700">admin@example.com</span>
+                        <span class="mx-1 text-gray-400">/</span>
+                        <span class="text-gray-500">password123</span>
+                    </button>
+                    <button type="button" onclick="fillLogin('ahmad.rizki@example.com', 'password123')"
+                            class="w-full text-left px-3 py-2 bg-white border border-gray-200 rounded hover:bg-green-50 hover:border-green-300 transition text-xs">
+                        <span class="font-semibold text-green-600">Mahasiswa:</span>
+                        <span class="ml-2 text-gray-700">ahmad.rizki@example.com</span>
+                        <span class="mx-1 text-gray-400">/</span>
+                        <span class="text-gray-500">password123</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+    function fillLogin(email, password) {
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
+        
+        // Visual feedback
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        emailInput.classList.add('ring-2', 'ring-green-500');
+        passwordInput.classList.add('ring-2', 'ring-green-500');
+        setTimeout(() => {
+            emailInput.classList.remove('ring-2', 'ring-green-500');
+            passwordInput.classList.remove('ring-2', 'ring-green-500');
+        }, 500);
+    }
+    </script>
 </body>
 </html>

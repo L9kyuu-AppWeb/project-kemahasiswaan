@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Rekognisi;
 use App\Models\JenisRekognisi;
+use App\Models\JenisKegiatan;
+use App\Models\DetailKegiatan;
+use App\Models\RuangLingkup;
+use App\Models\NilaiKegiatan;
+use App\Rules\ValidCertificateDate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -17,14 +22,10 @@ class RekognisiController extends Controller
      */
     public function adminIndex(Request $request)
     {
-        $query = Rekognisi::with(['jenisRekognisi'])->latest();
+        $query = Rekognisi::with(['jenisRekognisi', 'jenisKegiatan', 'detailKegiatan', 'ruangLingkup', 'mahasiswa'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-
-        if ($request->filled('level')) {
-            $query->where('level', $request->level);
         }
 
         $rekognisis = $query->paginate(15);
@@ -46,7 +47,9 @@ class RekognisiController extends Controller
     public function adminEdit(Rekognisi $rekognisi)
     {
         $jenisRekognisiList = JenisRekognisi::orderBy('nama')->get();
-        return view('admin.rekognisi.edit', compact('rekognisi', 'jenisRekognisiList'));
+        $jenisKegiatans = JenisKegiatan::orderBy('nama')->get();
+        $ruangLingkups = RuangLingkup::orderBy('nama')->get();
+        return view('admin.rekognisi.edit', compact('rekognisi', 'jenisRekognisiList', 'jenisKegiatans', 'ruangLingkups'));
     }
 
     /**
@@ -55,7 +58,6 @@ class RekognisiController extends Controller
     public function adminUpdate(Request $request, Rekognisi $rekognisi)
     {
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_rekognisi' => 'required|string|max:255',
             'jenis_rekognisi_id' => 'required|exists:jenis_rekognisi,id',
             'nama_penyelenggara' => 'required|string|max:255',
@@ -64,11 +66,12 @@ class RekognisiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nim' => 'required|string|max:20',
-            'nama_mahasiswa' => 'required|string|max:150',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
         ]);
 
         // Handle file uploads
@@ -99,6 +102,12 @@ class RekognisiController extends Controller
             }
             $validated['surat_tugas'] = $request->file('surat_tugas')->store('rekognisi/surat_tugas', 'public');
         }
+
+        // Add kegiatan fields
+        $rekognisi->jenis_kegiatan_id = $validated['jenis_kegiatan_id'];
+        $rekognisi->detail_kegiatan_id = $validated['detail_kegiatan_id'];
+        $rekognisi->ruang_lingkup_id = $validated['ruang_lingkup_id'];
+        $rekognisi->nilai = $validated['nilai'] ?? 0;
 
         $rekognisi->update($validated);
 
@@ -160,12 +169,21 @@ class RekognisiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
-        $rekognisis = Rekognisi::where('nim', $mahasiswa->nim)
-            ->with(['jenisRekognisi'])
+        $rekognisis = Rekognisi::where('mahasiswa_id', $mahasiswa->id)
+            ->with(['jenisRekognisi', 'jenisKegiatan', 'detailKegiatan', 'ruangLingkup', 'mahasiswa'])
             ->latest()
             ->paginate(15);
 
         return view('mahasiswa.rekognisi.index', compact('rekognisis'));
+    }
+
+    /**
+     * Show panduan/referensi jenis rekognisi untuk mahasiswa.
+     */
+    public function panduan()
+    {
+        $jenisRekognisiList = JenisRekognisi::orderBy('nama')->get();
+        return view('mahasiswa.rekognisi.panduan', compact('jenisRekognisiList'));
     }
 
     /**
@@ -175,8 +193,10 @@ class RekognisiController extends Controller
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
         $jenisRekognisiList = JenisRekognisi::orderBy('nama')->get();
+        $jenisKegiatans = JenisKegiatan::orderBy('id')->get();
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
 
-        return view('mahasiswa.rekognisi.create', compact('mahasiswa', 'jenisRekognisiList'));
+        return view('mahasiswa.rekognisi.create', compact('mahasiswa', 'jenisRekognisiList', 'jenisKegiatans', 'dosens'));
     }
 
     /**
@@ -187,7 +207,6 @@ class RekognisiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_rekognisi' => 'required|string|max:255',
             'jenis_rekognisi_id' => 'required|exists:jenis_rekognisi,id',
             'nama_penyelenggara' => 'required|string|max:255',
@@ -196,9 +215,12 @@ class RekognisiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
         ]);
 
         // Upload files
@@ -217,9 +239,12 @@ class RekognisiController extends Controller
         }
 
         Rekognisi::create([
-            'level' => $validated['level'],
             'nama_rekognisi' => $validated['nama_rekognisi'],
             'jenis_rekognisi_id' => $validated['jenis_rekognisi_id'],
+            'jenis_kegiatan_id' => $validated['jenis_kegiatan_id'],
+            'detail_kegiatan_id' => $validated['detail_kegiatan_id'],
+            'ruang_lingkup_id' => $validated['ruang_lingkup_id'],
+            'nilai' => $validated['nilai'] ?? 0,
             'nama_penyelenggara' => $validated['nama_penyelenggara'],
             'url_rekognisi' => $validated['url_rekognisi'],
             'dokumen_sertifikat' => $dokumenSertifikatPath,
@@ -227,10 +252,8 @@ class RekognisiController extends Controller
             'dokumen_bukti' => $dokumenBuktiPath,
             'surat_tugas' => $suratTugasPath,
             'tanggal_sertifikat' => $validated['tanggal_sertifikat'],
-            'nim' => $mahasiswa->nim,
-            'nama_mahasiswa' => $mahasiswa->nama,
-            'nidn_nuptk' => $validated['nidn_nuptk'],
-            'nama_dosen' => $validated['nama_dosen'],
+            'mahasiswa_id' => $mahasiswa->id,
+            'dosen_id' => $validated['dosen_id'],
             'status' => 'pending',
         ]);
 
@@ -246,7 +269,7 @@ class RekognisiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         // Only allow viewing own data
-        if ($rekognisi->nim !== $mahasiswa->nim) {
+        if ($rekognisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -261,7 +284,7 @@ class RekognisiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         // Only allow editing own data and only if pending
-        if ($rekognisi->nim !== $mahasiswa->nim) {
+        if ($rekognisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -271,8 +294,10 @@ class RekognisiController extends Controller
         }
 
         $jenisRekognisiList = JenisRekognisi::orderBy('nama')->get();
+        $jenisKegiatans = JenisKegiatan::orderBy('id')->get();
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
 
-        return view('mahasiswa.rekognisi.edit', compact('rekognisi', 'jenisRekognisiList'));
+        return view('mahasiswa.rekognisi.edit', compact('rekognisi', 'jenisRekognisiList', 'jenisKegiatans', 'dosens'));
     }
 
     /**
@@ -283,7 +308,7 @@ class RekognisiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         // Only allow editing own data and only if pending
-        if ($rekognisi->nim !== $mahasiswa->nim) {
+        if ($rekognisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -293,7 +318,6 @@ class RekognisiController extends Controller
         }
 
         $validated = $request->validate([
-            'level' => 'required|in:Provinsi,Nasional,Internasional',
             'nama_rekognisi' => 'required|string|max:255',
             'jenis_rekognisi_id' => 'required|exists:jenis_rekognisi,id',
             'nama_penyelenggara' => 'required|string|max:255',
@@ -302,9 +326,12 @@ class RekognisiController extends Controller
             'foto_kegiatan' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_bukti' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
+            'dosen_id' => 'nullable|exists:dosens,id',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
         ]);
 
         // Handle file uploads
@@ -344,6 +371,12 @@ class RekognisiController extends Controller
             unset($validated['surat_tugas']);
         }
 
+        // Add kegiatan fields
+        $rekognisi->jenis_kegiatan_id = $validated['jenis_kegiatan_id'];
+        $rekognisi->detail_kegiatan_id = $validated['detail_kegiatan_id'];
+        $rekognisi->ruang_lingkup_id = $validated['ruang_lingkup_id'];
+        $rekognisi->nilai = $validated['nilai'] ?? 0;
+
         $rekognisi->update($validated);
 
         return redirect()->route('mahasiswa.rekognisi.index')
@@ -358,7 +391,7 @@ class RekognisiController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         // Only allow deleting own data and only if pending
-        if ($rekognisi->nim !== $mahasiswa->nim) {
+        if ($rekognisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -385,5 +418,32 @@ class RekognisiController extends Controller
 
         return redirect()->route('mahasiswa.rekognisi.index')
             ->with('success', 'Data rekognisi berhasil dihapus.');
+    }
+
+    /**
+     * Get nilai based on jenis, detail, and ruang lingkup.
+     */
+    public function getNilai(Request $request)
+    {
+        $nilai = NilaiKegiatan::where('jenis_id', $request->jenis_id)
+            ->where('detail_id', $request->detail_id)
+            ->where('ruang_id', $request->ruang_id)
+            ->first();
+
+        return response()->json([
+            'nilai' => $nilai ? $nilai->nilai : 0,
+        ]);
+    }
+
+    /**
+     * Get details based on jenis_id.
+     */
+    public function getDetails(Request $request)
+    {
+        $details = DetailKegiatan::where('jenis_id', $request->jenis_id)
+            ->orderBy('nama')
+            ->get();
+
+        return response()->json($details);
     }
 }

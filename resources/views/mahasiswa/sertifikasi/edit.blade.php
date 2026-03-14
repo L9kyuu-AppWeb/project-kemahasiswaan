@@ -31,11 +31,6 @@
                     <div>
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-certificate text-indigo-600 mr-2"></i>Informasi Sertifikasi</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="block text-gray-700 font-semibold mb-2">Level <span class="text-red-500">*</span></label>
-                                <select name="level" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" required>
-                                    <option value="">Pilih Level</option><option value="Provinsi" {{ old('level', $sertifikasi->level) == 'Provinsi' ? 'selected' : '' }}>Provinsi</option><option value="Nasional" {{ old('level', $sertifikasi->level) == 'Nasional' ? 'selected' : '' }}>Nasional</option><option value="Internasional" {{ old('level', $sertifikasi->level) == 'Internasional' ? 'selected' : '' }}>Internasional</option>
-                                </select>
-                            </div>
                             <div><label class="block text-gray-700 font-semibold mb-2">Nama Sertifikasi <span class="text-red-500">*</span></label><input type="text" name="nama_sertifikasi" value="{{ old('nama_sertifikasi', $sertifikasi->nama_sertifikasi) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" required></div>
                             <div><label class="block text-gray-700 font-semibold mb-2">Nama Penyelenggara <span class="text-red-500">*</span></label><input type="text" name="nama_penyelenggara" value="{{ old('nama_penyelenggara', $sertifikasi->nama_penyelenggara) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500" required></div>
                             <div><label class="block text-gray-700 font-semibold mb-2">Tanggal Sertifikat</label><input type="date" name="tanggal_sertifikat" value="{{ old('tanggal_sertifikat', $sertifikasi->tanggal_sertifikat?->format('Y-m-d')) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"></div>
@@ -47,8 +42,17 @@
                         <h3 class="font-bold text-gray-800 mb-4 border-b pb-2"><i class="fas fa-users text-indigo-600 mr-2"></i>Data Peserta</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div><label class="block text-gray-700 font-semibold mb-2">NIM</label><input type="text" value="{{ $sertifikasi->nim }}" disabled class="w-full px-4 py-3 border rounded-lg bg-gray-100"></div>
-                            <div><label class="block text-gray-700 font-semibold mb-2">NIDN/NUPTK</label><input type="text" name="nidn_nuptk" value="{{ old('nidn_nuptk', $sertifikasi->nidn_nuptk) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"></div>
-                            <div><label class="block text-gray-700 font-semibold mb-2">Nama Dosen</label><input type="text" name="nama_dosen" value="{{ old('nama_dosen', $sertifikasi->nama_dosen) }}" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"></div>
+                            <div>
+                                <label class="block text-gray-700 font-semibold mb-2">Dosen Pembimbing</label>
+                                <select name="dosen_id" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">-- Pilih Dosen (Opsional) --</option>
+                                    @foreach($dosens as $dosen)
+                                    <option value="{{ $dosen->id }}" {{ old('dosen_id', $sertifikasi->dosen_id) == $dosen->id ? 'selected' : '' }}>
+                                        {{ $dosen->nama }} ({{ $dosen->nuptk }})
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
 

@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\KompetisiMahasiswaDosen;
 use App\Models\LombaKategori;
 use App\Models\Mahasiswa;
+use App\Models\JenisKegiatan;
+use App\Models\DetailKegiatan;
+use App\Models\RuangLingkup;
+use App\Models\NilaiKegiatan;
+use App\Rules\ValidCertificateDate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -18,14 +23,10 @@ class KompetisiMahasiswaDosenController extends Controller
      */
     public function adminIndex(Request $request)
     {
-        $query = KompetisiMahasiswaDosen::with([])->latest();
+        $query = KompetisiMahasiswaDosen::with(['jenisKegiatan', 'detailKegiatan', 'ruangLingkup', 'mahasiswa'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        }
-
-        if ($request->filled('level_kegiatan')) {
-            $query->where('level_kegiatan', $request->level_kegiatan);
         }
 
         if ($request->filled('kategori')) {
@@ -51,7 +52,9 @@ class KompetisiMahasiswaDosenController extends Controller
     public function adminEdit(KompetisiMahasiswaDosen $kompetisi)
     {
         $kategoriList = LombaKategori::orderBy('nama')->get();
-        return view('admin.kompetisi.edit', compact('kompetisi', 'kategoriList'));
+        $jenisKegiatans = JenisKegiatan::orderBy('nama')->get();
+        $ruangLingkups = RuangLingkup::orderBy('nama')->get();
+        return view('admin.kompetisi.edit', compact('kompetisi', 'kategoriList', 'jenisKegiatans', 'ruangLingkups'));
     }
 
     /**
@@ -60,7 +63,6 @@ class KompetisiMahasiswaDosenController extends Controller
     public function adminUpdate(Request $request, KompetisiMahasiswaDosen $kompetisi)
     {
         $validated = $request->validate([
-            'level_kegiatan' => 'required|in:Kabupaten/Kota,Provinsi/wilayah,Nasional,Internasional',
             'kategori' => 'required|string|max:100',
             'nama_kompetisi' => 'required|string|max:255',
             'nama_cabang' => 'nullable|string|max:255',
@@ -71,13 +73,14 @@ class KompetisiMahasiswaDosenController extends Controller
             'bentuk' => 'required|in:Luring/Hibrida,Daring',
             'url_kompetisi' => 'nullable|url|max:500',
             'dokumen_sertifikat' => 'nullable|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
             'foto_upp' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_undangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'nim' => 'required|string|max:20',
-            'nama_mahasiswa' => 'required|string|max:150',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'dosen_id' => 'nullable|exists:dosens,id',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
             'url_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
         ]);
 
@@ -112,7 +115,13 @@ class KompetisiMahasiswaDosenController extends Controller
             unset($validated['url_surat_tugas']);
         }
 
-        $kompetisi->update($validated);
+        // Add kegiatan fields
+        $kompetisi->jenis_kegiatan_id = $validated['jenis_kegiatan_id'];
+        $kompetisi->detail_kegiatan_id = $validated['detail_kegiatan_id'];
+        $kompetisi->ruang_lingkup_id = $validated['ruang_lingkup_id'];
+        $kompetisi->nilai = $validated['nilai'] ?? 0;
+
+        $kompetisi->update();
 
         return redirect()->route('admin.kompetisi.index')
             ->with('success', 'Data kompetisi berhasil diperbarui.');
@@ -171,8 +180,9 @@ class KompetisiMahasiswaDosenController extends Controller
     public function index()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        
-        $kompetisis = KompetisiMahasiswaDosen::where('nim', $mahasiswa->nim)
+
+        $kompetisis = KompetisiMahasiswaDosen::where('mahasiswa_id', $mahasiswa->id)
+            ->with(['jenisKegiatan', 'detailKegiatan', 'ruangLingkup'])
             ->latest()
             ->paginate(15);
 
@@ -187,7 +197,14 @@ class KompetisiMahasiswaDosenController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
         $kategoriList = LombaKategori::orderBy('nama')->get();
         
-        return view('mahasiswa.kompetisi.create', compact('mahasiswa', 'kategoriList'));
+        // Filter jenis kegiatan hanya untuk kompetisi
+        $jenisKegiatans = JenisKegiatan::where('nama', 'LIKE', '%Kompetisi%')
+            ->orderBy('nama')
+            ->get();
+        
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
+
+        return view('mahasiswa.kompetisi.create', compact('mahasiswa', 'kategoriList', 'jenisKegiatans', 'dosens'));
     }
 
     /**
@@ -198,7 +215,6 @@ class KompetisiMahasiswaDosenController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         $validated = $request->validate([
-            'level_kegiatan' => 'required|in:Kabupaten/Kota,Provinsi/wilayah,Nasional,Internasional',
             'kategori' => 'required|string|max:100',
             'nama_kompetisi' => 'required|string|max:255',
             'nama_cabang' => 'nullable|string|max:255',
@@ -209,12 +225,15 @@ class KompetisiMahasiswaDosenController extends Controller
             'bentuk' => 'required|in:Luring/Hibrida,Daring',
             'url_kompetisi' => 'nullable|url|max:500',
             'dokumen_sertifikat' => 'required|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
             'foto_upp' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_undangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'dosen_id' => 'nullable|exists:dosens,id',
             'url_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
         ]);
 
         // Upload files
@@ -236,8 +255,11 @@ class KompetisiMahasiswaDosenController extends Controller
         }
 
         KompetisiMahasiswaDosen::create([
-            'level_kegiatan' => $validated['level_kegiatan'],
             'kategori' => $validated['kategori'],
+            'jenis_kegiatan_id' => $validated['jenis_kegiatan_id'],
+            'detail_kegiatan_id' => $validated['detail_kegiatan_id'],
+            'ruang_lingkup_id' => $validated['ruang_lingkup_id'],
+            'nilai' => $validated['nilai'] ?? 0,
             'nama_kompetisi' => $validated['nama_kompetisi'],
             'nama_cabang' => $validated['nama_cabang'],
             'peringkat' => $validated['peringkat'],
@@ -250,10 +272,8 @@ class KompetisiMahasiswaDosenController extends Controller
             'tanggal_sertifikat' => $validated['tanggal_sertifikat'],
             'foto_upp' => $fotoUppPath,
             'dokumen_undangan' => $dokumenUndanganPath,
-            'nim' => $mahasiswa->nim,
-            'nama_mahasiswa' => $mahasiswa->nama,
-            'nidn_nuptk' => $validated['nidn_nuptk'],
-            'nama_dosen' => $validated['nama_dosen'],
+            'mahasiswa_id' => $mahasiswa->id,
+            'dosen_id' => $validated['dosen_id'],
             'url_surat_tugas' => $urlSuratTugasPath,
             'status' => 'pending',
         ]);
@@ -268,9 +288,9 @@ class KompetisiMahasiswaDosenController extends Controller
     public function show(KompetisiMahasiswaDosen $kompetisi)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        
+
         // Only allow viewing own data
-        if ($kompetisi->nim !== $mahasiswa->nim) {
+        if ($kompetisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -283,9 +303,9 @@ class KompetisiMahasiswaDosenController extends Controller
     public function edit(KompetisiMahasiswaDosen $kompetisi)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        
+
         // Only allow editing own data and only if pending
-        if ($kompetisi->nim !== $mahasiswa->nim) {
+        if ($kompetisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -295,8 +315,10 @@ class KompetisiMahasiswaDosenController extends Controller
         }
 
         $kategoriList = LombaKategori::orderBy('nama')->get();
-        
-        return view('mahasiswa.kompetisi.edit', compact('kompetisi', 'kategoriList'));
+        $jenisKegiatans = JenisKegiatan::orderBy('id')->get();
+        $dosens = \App\Models\Dosen::orderBy('nama')->get();
+
+        return view('mahasiswa.kompetisi.edit', compact('kompetisi', 'kategoriList', 'jenisKegiatans', 'dosens'));
     }
 
     /**
@@ -305,9 +327,9 @@ class KompetisiMahasiswaDosenController extends Controller
     public function update(Request $request, KompetisiMahasiswaDosen $kompetisi)
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
-        
+
         // Only allow editing own data and only if pending
-        if ($kompetisi->nim !== $mahasiswa->nim) {
+        if ($kompetisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -317,7 +339,6 @@ class KompetisiMahasiswaDosenController extends Controller
         }
 
         $validated = $request->validate([
-            'level_kegiatan' => 'required|in:Kabupaten/Kota,Provinsi/wilayah,Nasional,Internasional',
             'kategori' => 'required|string|max:100',
             'nama_kompetisi' => 'required|string|max:255',
             'nama_cabang' => 'nullable|string|max:255',
@@ -328,12 +349,15 @@ class KompetisiMahasiswaDosenController extends Controller
             'bentuk' => 'required|in:Luring/Hibrida,Daring',
             'url_kompetisi' => 'nullable|url|max:500',
             'dokumen_sertifikat' => 'nullable|file|mimes:pdf|max:5120',
-            'tanggal_sertifikat' => 'nullable|date',
+            'tanggal_sertifikat' => ['nullable', 'date', new ValidCertificateDate()],
             'foto_upp' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'dokumen_undangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'nidn_nuptk' => 'nullable|string|max:30',
-            'nama_dosen' => 'nullable|string|max:150',
+            'dosen_id' => 'nullable|exists:dosens,id',
             'url_surat_tugas' => 'nullable|file|mimes:pdf|max:5120',
+            'jenis_kegiatan_id' => 'nullable|exists:jenis_kegiatan,id',
+            'detail_kegiatan_id' => 'nullable|exists:detail_kegiatan,id',
+            'ruang_lingkup_id' => 'nullable|exists:ruang_lingkup,id',
+            'nilai' => 'nullable|integer|min:0',
         ]);
 
         // Handle file uploads
@@ -373,7 +397,13 @@ class KompetisiMahasiswaDosenController extends Controller
             unset($validated['url_surat_tugas']);
         }
 
-        $kompetisi->update($validated);
+        // Add kegiatan fields
+        $kompetisi->jenis_kegiatan_id = $validated['jenis_kegiatan_id'];
+        $kompetisi->detail_kegiatan_id = $validated['detail_kegiatan_id'];
+        $kompetisi->ruang_lingkup_id = $validated['ruang_lingkup_id'];
+        $kompetisi->nilai = $validated['nilai'] ?? 0;
+
+        $kompetisi->update();
 
         return redirect()->route('mahasiswa.kompetisi.index')
             ->with('success', 'Data kompetisi berhasil diperbarui.');
@@ -387,7 +417,7 @@ class KompetisiMahasiswaDosenController extends Controller
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
         // Only allow deleting own data and only if pending
-        if ($kompetisi->nim !== $mahasiswa->nim) {
+        if ($kompetisi->mahasiswa_id !== $mahasiswa->id) {
             abort(403);
         }
 
@@ -414,5 +444,32 @@ class KompetisiMahasiswaDosenController extends Controller
 
         return redirect()->route('mahasiswa.kompetisi.index')
             ->with('success', 'Data kompetisi berhasil dihapus.');
+    }
+
+    /**
+     * Get nilai based on jenis, detail, and ruang lingkup.
+     */
+    public function getNilai(Request $request)
+    {
+        $nilai = NilaiKegiatan::where('jenis_id', $request->jenis_id)
+            ->where('detail_id', $request->detail_id)
+            ->where('ruang_id', $request->ruang_id)
+            ->first();
+
+        return response()->json([
+            'nilai' => $nilai ? $nilai->nilai : 0,
+        ]);
+    }
+
+    /**
+     * Get details based on jenis_id.
+     */
+    public function getDetails(Request $request)
+    {
+        $details = DetailKegiatan::where('jenis_id', $request->jenis_id)
+            ->orderBy('nama')
+            ->get();
+
+        return response()->json($details);
     }
 }

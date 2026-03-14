@@ -139,18 +139,11 @@ class AuthController extends Controller
         // Get kegiatan count
         $totalKegiatan = \App\Models\Kegiatan::where('is_published', true)->count();
 
-        // Get pengumuman terbaru
-        $pengumumanTerbaru = \App\Models\Pengumuman::where('is_published', true)
-            ->orderBy('created_at', 'desc')
-            ->limit(3)
-            ->get();
-
         return view('mahasiswa.dashboard', compact(
             'mahasiswa',
             'beasiswaAktif',
             'magangAktif',
-            'totalKegiatan',
-            'pengumumanTerbaru'
+            'totalKegiatan'
         ));
     }
 

@@ -12,7 +12,6 @@ class Sertifikasi extends Model
     protected $table = 'sertifikasi';
 
     protected $fillable = [
-        'level',
         'nama_sertifikasi',
         'nama_penyelenggara',
         'url_sertifikasi',
@@ -20,10 +19,8 @@ class Sertifikasi extends Model
         'foto_kegiatan',
         'dokumen_bukti',
         'tanggal_sertifikat',
-        'nim',
-        'nama_mahasiswa',
-        'nidn_nuptk',
-        'nama_dosen',
+        'mahasiswa_id',
+        'dosen_id',
         'url_surat_tugas',
         'status',
         'keterangan_verifikasi',
@@ -32,4 +29,30 @@ class Sertifikasi extends Model
     protected $casts = [
         'tanggal_sertifikat' => 'date',
     ];
+
+    public function mahasiswa()
+    {
+        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id');
+    }
+
+    public function dosen()
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_id');
+    }
+
+    /**
+     * Get NIM through mahasiswa relationship
+     */
+    public function getNimAttribute()
+    {
+        return $this->mahasiswa ? $this->mahasiswa->nim : null;
+    }
+
+    /**
+     * Get nama_mahasiswa through mahasiswa relationship
+     */
+    public function getNamaMahasiswaAttribute()
+    {
+        return $this->mahasiswa ? $this->mahasiswa->nama : null;
+    }
 }
